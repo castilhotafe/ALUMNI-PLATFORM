@@ -20,7 +20,7 @@ This project follows a structured branching model to ensure clean collaboration,
 ### Main Branches
 - **main**: Contains production-ready code.
     No direct commits or pushes are allowed.
-- **develop**: Used for integrating features before creating a release.
+- **dev**: Used for integrating features before creating a release.
     All new work must be merged here through Pull Requests.
 
 ### Working Branches
@@ -34,25 +34,25 @@ All work must be done in feature/ branches.
 - release/<version>
 
 ### Rules
-- Merging into `develop` or `main` requires a Pull Request
+- Merging into `main` or `dev` requires a Pull Request
 - Minimum two approval.
 - Force-push is **not allowed** on shared branches.
-- Direct commits to `main` or `develop` are strictly prohibited.
+- Direct commits to `main` or `dev` are strictly prohibited.
 
 
 ## Conventional Commits
 
 ### Types
-Changes relevant to the project, API or UI:
+Changes relevant to the project:
 
-- feat Commits that add, adjust or remove a feature to/of/from the API or UI
-- fix Commits that fix an API or UI bug of a preceded feat commit
-- refactor Commits that rewrite or restructure code without altering API or UI behavior
-- perf Commits are special type of refactor commits that specifically improve performance
-- style Commits that address code style (e.g., white-space, formatting, missing semi-colons) and do not affect application behavior
-- test Commits that add missing tests or correct existing ones
-- docs Commits that exclusively affect documentation
-- build Commits that affect build-related components such as build tools, dependencies, project version, ...
+- feat: that add, adjust or remove a feature
+- fix: that fix an bug of a preceded feat commit
+- refactor: that rewrite or restructure code without altering behavior
+- perf: are special type of refactor commits that specifically improve performance
+- style: that address code style and do not affect application behavior
+- test: that add missing tests or correct existing ones
+- docs: that exclusively affect documentation
+- build: that affect build-related components such as build tools, dependencies, project version, ...
 
 **Breaking Changes Indicator**
 A commit that introduce breaking changes must be indicated by an ! before the :
@@ -68,7 +68,7 @@ Use the imperative, present tense: "change" not "changed" nor "changes"
 The footer should contain issue references and informations about Breaking Changes
 
 - The footer is an optional part, except if the commit introduce breaking changes
-- Optionally reference issue identifiers (e.g., Closes #123, Fixes JIRA-456)
+- Optionally reference issue identifiers (e.g., Closes 123)
 - Breaking Changes must start with the word BREAKING CHANGE:
 - For a single line description just add a space after BREAKING CHANGE:
 - For a multi line description add two new lines after BREAKING CHANGE:
@@ -136,7 +136,7 @@ To ensure efficient reviews:
 - Avoid mixing unrelated changes in a single PR
 - Large PRs should be split into smaller, logical units
 
-## Code Review (Short Version)
+## Code Review
 All code changes must be reviewed before merging.
 
 **Reviewers should check for:**
@@ -147,28 +147,87 @@ All code changes must be reviewed before merging.
 
 A PR requires at least two approval before merging.
 
-## Push Policies (Short Version)
-- Direct pushes to main or develop are not allowed.
+## Push Policies
+- Direct pushes to main or dev are not allowed.
 - Work must be done in feature branches.
 - Always run tests and linting before pushing.
 - Never push secrets, credentials, or sensitive data.
 - Force-push is prohibited on shared branches.
 
-## Issue Creation (Short Version)
+## Issue Creation
 
 **Issues must include:**
-- A clear title
-- A concise description of the problem or request
-- Expected vs actual behavior
-- Relevant logs, screenshots, or context(If it is necesary)
-- Use labels to categorize issues (bug, enhancement, docs).
+---
+name: Custom issue template
+about: The purpose of this template is to streamline the process of creating an issue so the team follows a standard
+title: ''
+labels: ''
+assignees: ''
+---
 
-## General Coding & Security Standards (Short Version)
+---
+title: "[Feature] Short Description"
+labels: ""
+assignees: ""
+---
 
-All contributors must use the project’s defined runtime and framework versions to ensure consistency and compatibility:
+### Goal
+Describe the objective of this issue.
 
-- Laravel **13.24.0**
-- PHP **8.5.2**
+Answer:
+- What are we trying to achieve?
+- Why is this work needed?
+
+Example:
+Set up the team's GitHub Project so development can be planned, tracked and managed consistently.
+---
+
+### User Story
+Describe the value from the user's perspective.
+Format:
+
+As a <user>,
+I want <goal>,
+so that <benefit>.
+
+Example:
+
+As a team member,
+I want a configured GitHub Project,
+so that I can easily track my work and collaborate with the team.
+---
+
+### Scope
+Describe what will be delivered as part of this issue.
+
+List only the work included in this issue.
+
+Example:
+- Configure workflow statuses.
+- Create project labels.
+- Configure Board and Table views.
+---
+
+### Acceptance Criteria
+Define the measurable conditions that must be satisfied before this issue can be closed.
+
+Example:
+- [ ] Workflow statuses have been configured.
+- [ ] Project labels have been created.
+- [ ] Team members can access the project.
+---
+
+### Notes (Optional)
+Add any useful references, links or additional context.
+
+Examples:
+- Assessment documentation
+- Client requirements
+- Design mockups
+- API documentation
+
+
+## General Coding & Security Standards
 - Follow project naming conventions and folder structure.
 - Write clean, readable, and maintainable code.
 - Avoid unnecessary complexity.
