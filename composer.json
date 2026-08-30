@@ -51,7 +51,7 @@
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",
-            "@php artisan test",
+            "@php artisan test --coverage",
             "vendor/bin/pint --test"
         ],
         "post-autoload-dump": [
