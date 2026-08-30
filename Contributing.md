@@ -152,7 +152,13 @@ To ensure efficient reviews:
 
 ## Code Review
 
-All code changes must be reviewed before merging.
+All code changes must be reviewed before merging. Run:
+
+```bash
+composer test
+```
+
+Which runs all unit and feature tests to ensure that the code is functioning as expected.
 
 **Reviewers should check for:**
 
@@ -277,8 +283,8 @@ Follow these steps to clone the repository and set up your local development env
 
 Ensure your system meets the required environment versions for this project:
 
-- **PHP**: `^8.5.2`
-- **Laravel**: `^13.24.0`
+- **PHP**: `^8.3`
+- **Laravel**: `^13.8`
 - **Composer**: For managing PHP dependencies.
 - **Node.js & npm**: For managing frontend assets
 
@@ -293,7 +299,7 @@ cd ALUMNI-PLATFORM
 
 ### 2. Install PHP Dependencies
 
-If you have not already installed the required Laravel framework (`v13.24.0`) dependencies using Composer:
+If you have not already installed the required Laravel framework (`v13.8.0`) dependencies using Composer:
 
 ```bash
 composer install
