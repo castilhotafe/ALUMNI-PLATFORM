@@ -157,8 +157,8 @@ All code changes must be reviewed before merging. Run:
 ```bash
 composer test
 ```
-
-Which runs all unit and feature tests to ensure that the code is functioning as expected.
+This command runs the Pest test suite with code coverage and Laravel Pint to check code style before changes are pushed. Make sure the [development prerequisites](#prerequisites) are configured before running it.
+It also runs all unit and feature tests to ensure that the code is functioning as expected.
 
 **Reviewers should check for:**
 
@@ -287,7 +287,7 @@ Ensure your system meets the required environment versions for this project:
 - **Laravel**: `^13.8`
 - **Composer**: For managing PHP dependencies.
 - **Node.js & npm**: For managing frontend assets
-
+- **Xdebug**: Required with coverage mode enabled to generate test coverage when running [`composer test`](#code-review).
 ### 1. Clone the Repository
 
 Clone the project from GitHub and move into the directory:
