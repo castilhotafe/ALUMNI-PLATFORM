@@ -1,0 +1,98 @@
+// ============================================================================
+// BUTTONS
+// ============================================================================
+
+// NOTE: variables and mixins are imported by app.scss via @import
+// to maintain backward compatibility with @import-based partials.
+
+// NMTAFE Primary Button
+.btn-nmtafe {
+    @include button-base;
+    @include gradient-bg($nmtafe-red, $nmtafe-dark-red);
+    color: $color-white;
+
+    &:hover {
+        @include gradient-bg($nmtafe-dark-red, #5a0c0f);
+        color: $color-white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba($nmtafe-red, 0.4);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    // Icon spacing
+    i {
+        margin-right: $spacing-sm;
+    }
+}
+
+// NMTAFE Secondary Button
+.btn-nmtafe-secondary {
+    @include button-base;
+    border: 2px solid $nmtafe-red;
+    color: $nmtafe-red;
+    background: $color-white;
+
+    &:hover {
+        background: rgba($nmtafe-red, 0.05);
+        border-color: $nmtafe-dark-red;
+        color: $nmtafe-dark-red;
+    }
+
+    &:active {
+        background: rgba($nmtafe-red, 0.1);
+    }
+
+    i {
+        margin-right: $spacing-sm;
+    }
+}
+
+// Outline Secondary Button (for logout, secondary actions)
+.btn-outline-secondary {
+    @include button-base;
+    border: 2px solid $color-border;
+    color: $color-text-secondary;
+    background: $color-white;
+    padding: $spacing-sm $spacing-md;
+
+    &:hover {
+        border-color: $nmtafe-red;
+        color: $nmtafe-red;
+        background: $color-white;
+    }
+
+    i {
+        margin-right: $spacing-sm;
+    }
+}
+
+// Full width button modifier
+.w-100 {
+    width: 100%;
+}
+
+// Button sizes
+.btn-lg {
+    padding: 1rem 2rem;
+    font-size: $font-size-lg;
+}
+
+.btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: $font-size-sm;
+}
+
+// Button block (stacked)
+.btn-block {
+    display: block;
+    width: 100%;
+}

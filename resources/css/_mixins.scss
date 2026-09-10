@@ -1,0 +1,107 @@
+// ============================================================================
+// MIXINS
+// ============================================================================
+
+// Flexbox centering mixin
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// Flexbox with direction and alignment
+@mixin flex($direction: row, $align: center, $justify: flex-start) {
+    display: flex;
+    flex-direction: $direction;
+    align-items: $align;
+    justify-content: $justify;
+}
+
+// Transition mixin
+@mixin transition($properties: all, $duration: $transition-base) {
+    transition: $properties $duration;
+}
+
+// Gradient background
+@mixin gradient-bg($start-color, $end-color, $angle: 135deg) {
+    background: linear-gradient($angle, $start-color 0%, $end-color 100%);
+}
+
+// Hover state with transform
+@mixin hover-lift {
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba($nmtafe-red, 0.4);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+// Focus ring for accessibility
+@mixin focus-ring($color: $nmtafe-gray) {
+    outline: none;
+    border-color: $color;
+    box-shadow: 0 0 0 0.2rem rgba($color, 0.25);
+}
+
+// Button base styles
+@mixin button-base {
+    display: inline-block;
+    padding: $spacing-sm $spacing-md;
+    border: none;
+    border-radius: $radius-md;
+    font-family: $font-family-base;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    @include transition(all, $transition-base);
+
+    &:focus {
+        outline: none;
+    }
+}
+
+// Responsive grid mixin
+@mixin grid($columns: 1, $gap: $spacing-md) {
+    display: grid;
+    grid-template-columns: repeat($columns, 1fr);
+    gap: $gap;
+}
+
+// Absolute positioning
+@mixin position-absolute($top: 0, $right: 0, $bottom: 0, $left: 0) {
+    position: absolute;
+    top: $top;
+    right: $right;
+    bottom: $bottom;
+    left: $left;
+}
+
+// Truncate text
+@mixin truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Text overflow with ellipsis (multi-line)
+@mixin line-clamp($lines: 1) {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+// Visually hidden element
+@mixin sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}

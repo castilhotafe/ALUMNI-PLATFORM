@@ -1,0 +1,291 @@
+// ============================================================================
+// UTILITIES
+// ============================================================================
+
+// NOTE: variables and mixins are imported by app.scss via @import
+// to maintain backward compatibility with @import-based partials.
+
+// Text utilities
+.text-center {
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-right {
+    text-align: right;
+}
+
+// Text colors
+.text-dark {
+    color: $color-text-dark;
+}
+
+.text-secondary {
+    color: $color-text-secondary;
+}
+
+.text-error {
+    color: $color-error;
+}
+
+.text-success {
+    color: $color-success;
+}
+
+// Display utilities
+.d-none {
+    display: none !important;
+}
+
+.d-block {
+    display: block !important;
+}
+
+.d-inline {
+    display: inline !important;
+}
+
+.d-inline-block {
+    display: inline-block !important;
+}
+
+.d-flex {
+    display: flex !important;
+}
+
+.d-grid {
+    display: grid !important;
+}
+
+// Visibility
+.visually-hidden {
+    @include sr-only;
+}
+
+// Margin utilities
+@each $size, $value in (
+    'xs': $spacing-xs,
+    'sm': $spacing-sm,
+    'md': $spacing-md,
+    'lg': $spacing-lg,
+    'xl': $spacing-xl,
+    '2xl': $spacing-2xl,
+) {
+    // Margin all sides
+    .m-#{$size} {
+        margin: $value !important;
+    }
+
+    // Margin top
+    .mt-#{$size} {
+        margin-top: $value !important;
+    }
+
+    // Margin bottom
+    .mb-#{$size} {
+        margin-bottom: $value !important;
+    }
+
+    // Margin left
+    .ml-#{$size} {
+        margin-left: $value !important;
+    }
+
+    // Margin right
+    .mr-#{$size} {
+        margin-right: $value !important;
+    }
+
+    // Margin horizontal
+    .mx-#{$size} {
+        margin-left: $value !important;
+        margin-right: $value !important;
+    }
+
+    // Margin vertical
+    .my-#{$size} {
+        margin-top: $value !important;
+        margin-bottom: $value !important;
+    }
+}
+
+// Padding utilities
+@each $size, $value in (
+    'xs': $spacing-xs,
+    'sm': $spacing-sm,
+    'md': $spacing-md,
+    'lg': $spacing-lg,
+    'xl': $spacing-xl,
+    '2xl': $spacing-2xl,
+) {
+    // Padding all sides
+    .p-#{$size} {
+        padding: $value !important;
+    }
+
+    // Padding top
+    .pt-#{$size} {
+        padding-top: $value !important;
+    }
+
+    // Padding bottom
+    .pb-#{$size} {
+        padding-bottom: $value !important;
+    }
+
+    // Padding left
+    .pl-#{$size} {
+        padding-left: $value !important;
+    }
+
+    // Padding right
+    .pr-#{$size} {
+        padding-right: $value !important;
+    }
+
+    // Padding horizontal
+    .px-#{$size} {
+        padding-left: $value !important;
+        padding-right: $value !important;
+    }
+
+    // Padding vertical
+    .py-#{$size} {
+        padding-top: $value !important;
+        padding-bottom: $value !important;
+    }
+}
+
+// Width utilities
+.w-100 {
+    width: 100% !important;
+}
+
+.w-50 {
+    width: 50% !important;
+}
+
+.w-75 {
+    width: 75% !important;
+}
+
+.w-auto {
+    width: auto !important;
+}
+
+// Height utilities
+.h-100 {
+    height: 100% !important;
+}
+
+.h-auto {
+    height: auto !important;
+}
+
+// Flexbox utilities
+.flex-column {
+    flex-direction: column !important;
+}
+
+.flex-row {
+    flex-direction: row !important;
+}
+
+.align-items-center {
+    align-items: center !important;
+}
+
+.justify-content-center {
+    justify-content: center !important;
+}
+
+.justify-content-between {
+    justify-content: space-between !important;
+}
+
+// Gap utility
+.gap-md {
+    gap: $spacing-md !important;
+}
+
+.gap-lg {
+    gap: $spacing-lg !important;
+}
+
+// Rounded utilities
+.rounded {
+    border-radius: $radius-md !important;
+}
+
+.rounded-lg {
+    border-radius: $radius-lg !important;
+}
+
+.rounded-sm {
+    border-radius: $radius-sm !important;
+}
+
+// Shadow utilities
+.shadow-sm {
+    box-shadow: $shadow-sm !important;
+}
+
+.shadow-md {
+    box-shadow: $shadow-md !important;
+}
+
+.shadow-lg {
+    box-shadow: $shadow-lg !important;
+}
+
+// Opacity utilities
+.opacity-50 {
+    opacity: 0.5 !important;
+}
+
+.opacity-75 {
+    opacity: 0.75 !important;
+}
+
+// Cursor utilities
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
+.cursor-not-allowed {
+    cursor: not-allowed !important;
+}
+
+// Responsive display
+@media (max-width: 576px) {
+    .d-sm-none {
+        display: none !important;
+    }
+
+    .d-sm-block {
+        display: block !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .d-md-none {
+        display: none !important;
+    }
+
+    .d-md-block {
+        display: block !important;
+    }
+}
+
+@media (min-width: 992px) {
+    .d-lg-flex {
+        display: flex !important;
+    }
+
+    .d-lg-none {
+        display: none !important;
+    }
+}
