@@ -224,6 +224,13 @@
             </div>
         </section>
 
+        <footer class="alumni-footer d-flex flex-column flex-lg-row justify-content-between gap-2 pb-4 pb-lg-5">
+            <div class="fw-semibold">North Metropolitan TAFE Alumni App</div>
+            <div>Designed to keep the community connected, informed, and ready for what comes next.</div>
+        </footer>
+    </main>
+    </div>
+
 </body>
 
 </html>
