@@ -58,6 +58,8 @@
 
     <!-- Back to Login -->
     <div class="auth-footer">
-        <p><a href="{{ route('login') }}" class="text-link-secondary"><i class="fas fa-arrow-left"></i> Back to login</a></p>
-    </div>
+        <p><a href="
+        <!-- {{ route('login') }} -->
+         " class="text-link-secondary"><i class="fas fa-arrow-left"></i> Back to login</a></p>
+    </div> 
 @endsection
