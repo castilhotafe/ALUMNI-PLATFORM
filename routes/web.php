@@ -6,6 +6,22 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Guest Routes (Only for logged-out users)
+Route::middleware('guest')->group(function () {
+ 
+    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+        ->name('password.request');
+
+    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->name('password.email');
+
+    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
+        ->name('password.reset');
+
+    Route::post('reset-password', [NewPasswordController::class, 'store'])
+        ->name('password.store');
+});
+
 // Authenticated and Verified Routes (Only for logged-in users with verified email)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
