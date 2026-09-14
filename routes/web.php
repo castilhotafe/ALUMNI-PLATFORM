@@ -4,17 +4,11 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use Illuminate\Support\Facades\Route;
 
-
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::view('/', 'welcome')->name('login');
 
 // Guest Routes (Only for logged-out users)
 Route::middleware('guest')->group(function () {
 
-    Route::get('/')->name('login');
-
- 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
 
