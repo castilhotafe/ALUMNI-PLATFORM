@@ -7,6 +7,6 @@ Route::get('/', function () {
 });
 
 // Authenticated and Verified Routes (Only for logged-in users with verified email)
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['', ''])->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
 });
