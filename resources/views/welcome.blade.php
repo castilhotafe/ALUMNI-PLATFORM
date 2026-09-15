@@ -38,9 +38,8 @@
                 @endauth
 
                 @guest
-                    {{-- Stub routes for login and register until views are done --}}
-                    <a href="" class="btn btn-outline-dark rounded-pill px-4 fw-semibold">Log in</a>
-                    <a href="" class="btn btn-danger rounded-pill px-4 fw-semibold">Register</a>
+                    <a href="{{ route('login') }}" class="btn btn-outline-dark rounded-pill px-4 fw-semibold">Log in</a>
+                    <a href="{{ route('register') }}" class="btn btn-danger rounded-pill px-4 fw-semibold">Register</a>
                 @endguest
             </div>
         </div>
@@ -61,9 +60,11 @@
 
                     <div class="d-flex flex-wrap gap-3 mb-4 mb-lg-5">
                         @guest
-                            <a href="" class="btn btn-danger btn-lg rounded-pill px-4 fw-semibold">Create your
+                            <a href="{{ route('register') }}"
+                                class="btn btn-danger btn-lg rounded-pill px-4 fw-semibold">Create your
                                 account</a>
-                            <a href="" class="btn btn-outline-dark btn-lg rounded-pill px-4 fw-semibold">Already have
+                            <a href="{{ route('login') }}"
+                                class="btn btn-outline-dark btn-lg rounded-pill px-4 fw-semibold">Already have
                                 an
                                 account?</a>
                         @endguest
