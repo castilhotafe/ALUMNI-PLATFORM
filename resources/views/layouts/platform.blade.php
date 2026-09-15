@@ -73,7 +73,7 @@
 
             @auth
                 <div class="mt-4">
-                    <x-contribution-indicator :user="auth()->user()" compact />
+                    {{-- <x-contribution-indicator :user="auth()->user()" compact /> --}}
                 </div>
             @endauth
 
@@ -108,7 +108,7 @@
                         <span class="badge rounded-pill text-bg-light nmtafe-pill">{{ $roleLabel }}</span>
                         <span class="badge rounded-pill text-bg-danger nmtafe-pill">Blackboard</span>
                         @auth
-                            <x-contribution-indicator :user="auth()->user()" compact class="flex-shrink-0" />
+                            {{-- <x-contribution-indicator :user="auth()->user()" compact class="flex-shrink-0" /> --}}
                         @endauth
                     </div>
                 </div>
@@ -161,7 +161,7 @@
             </nav>
 
             @auth
-                <x-contribution-indicator :user="auth()->user()" compact class="mt-1" />
+                {{-- <x-contribution-indicator :user="auth()->user()" compact class="mt-1" /> --}}
             @endauth
 
             <div class="mt-auto">
