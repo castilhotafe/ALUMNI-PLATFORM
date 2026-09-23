@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreProjectRequest extends FormRequest
@@ -16,14 +17,13 @@ class StoreProjectRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Allow all authenticated users to create projects
-        return true;
+        return $this->user() !== null;
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -33,6 +33,7 @@ class StoreProjectRequest extends FormRequest
             'repo_url' => ['nullable', 'url', 'max:255'],
             'visibility' => ['required', 'string', 'in:public,private'],
             'collaborators' => ['nullable', 'array'],
+            'collaborators.*' => ['array:name,role'],
             'collaborators.*.name' => ['nullable', 'string', 'max:255'],
             'collaborators.*.role' => ['nullable', 'string', 'max:255'],
             'profile_bio' => ['nullable', 'string', 'max:1000'],

@@ -6,16 +6,19 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class DestroyProjectRequest extends FormRequest
 {
+    protected $errorBag = 'project';
+
     /**
      * Determine if the user is authorized to delete this project.
      */
     public function authorize(): bool
     {
-        // Fetch the project instance from the route parameters
+        $user = $this->user();
         $project = $this->route('project');
 
-        // Check if the user is associated with this project before allowing deletion
-        return $project && $project->users()->whereKey($this->user()->id)->exists();
+        return $user !== null
+            && $project !== null
+            && $project->users()->whereKey($user->getKey())->exists();
     }
 
     /**

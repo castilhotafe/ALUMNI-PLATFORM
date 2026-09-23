@@ -6,16 +6,19 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateProjectRequest extends FormRequest
 {
+    protected $errorBag = 'project';
+
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        // Fetch the active project instance from the route parameters
+        $user = $this->user();
         $project = $this->route('project');
 
-        // Verify the user is linked to the project. Returns a 403 error automatically if false.
-        return $project && $project->users()->whereKey($this->user()->id)->exists();
+        return $user !== null
+            && $project !== null
+            && $project->users()->whereKey($user->getKey())->exists();
     }
 
     /**
@@ -31,6 +34,7 @@ class UpdateProjectRequest extends FormRequest
             'repo_url' => ['nullable', 'url', 'max:255'],
             'visibility' => ['required', 'string', 'in:public,private'],
             'collaborators' => ['nullable', 'array'],
+            'collaborators.*' => ['array:name,role'],
             'collaborators.*.name' => ['nullable', 'string', 'max:255'],
             'collaborators.*.role' => ['nullable', 'string', 'max:255'],
             'profile_bio' => ['nullable', 'string', 'max:1000'],
