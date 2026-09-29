@@ -16,6 +16,16 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->unsignedInteger('student_id')->nullable();
+            $table->boolean('isCurrent')->default(false);
+            $table->boolean('isAlumni')->default(false);
+            $table->boolean('isLecturer')->default(false);
+            $table->boolean('isPartner')->default(false);
+            $table->boolean('isVerifiedCurrent')->default(false);
+            $table->boolean('isVerifiedAlumni')->default(false);
+            $table->boolean('isVerifiedLecturer')->default(false);
+            $table->boolean('isVerifiedPartner')->default(false);
+            $table->timestamp('password_confirmed_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
