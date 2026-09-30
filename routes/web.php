@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
@@ -11,6 +13,12 @@ Route::view('/', 'welcome')->name('login');
 
 // Guest Routes (Only for logged-out users)
 Route::middleware('guest')->group(function () {
+
+    Route::get('/register', [RegisterController::class, 'create'])->name('register');
+    Route::post('/register', [RegisterController::class, 'store']);
+
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store']);
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
@@ -36,13 +44,6 @@ Route::get('/verify-email', EmailVerificationPromptController::class)
 Route::post('/email/verification-notification', EmailVerificationNotificationController::class)
     ->middleware(['auth', 'throttle:6,1'])
     ->name('verification.send');
-
-// Guest Route (logged-out users)
-// Need Register and Login Controllers to handle authentication logic
-Route::middleware('guest')->group(function () {
-    Route::view('/login', 'auth.login')->name('login');
-    Route::view('/register', 'auth.register')->name('register');
-});
 
 // Authenticated and Verified Routes (Only for logged-in users with verified email)
 Route::middleware(['', ''])->group(function () {
