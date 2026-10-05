@@ -13,5 +13,9 @@
         "sass": "^1.104.0",
         "tailwindcss": "^4.0.0",
         "vite": "^8.0.0"
+    },
+    "dependencies": {
+        "alpinejs": "^3.17.4",
+        "bootstrap": "^5.3.8"
     }
 }
