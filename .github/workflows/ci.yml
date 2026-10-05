@@ -14,7 +14,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.5'
+          php-version: "8.5"
           coverage: xdebug
 
       - name: Install dependencies
@@ -26,4 +26,10 @@ jobs:
           php artisan key:generate
 
       - name: Run tests, coverage and Pint
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+          DB_URL: ""
+          SESSION_DRIVER: array
         run: composer test
