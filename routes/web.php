@@ -54,4 +54,5 @@ Route::middleware('auth')->group(function () {
 // Authenticated and Verified Routes (Only for logged-in users with verified email)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
+    Route::view('/projects', 'platform.sections.projects')->name('projects');
 });
