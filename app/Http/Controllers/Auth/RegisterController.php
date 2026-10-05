@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
-use App\Models\Profile;
+// use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -69,7 +69,7 @@ class RegisterController extends Controller
         // Assign Spatie Role and initialize user profile
         Role::findOrCreate($roleConfig['role']);
         $user->assignRole($roleConfig['role']);
-        Profile::firstOrCreate(['user_id' => $user->id]);
+        // Profile::firstOrCreate(['user_id' => $user->id]);
 
         // Trigger email verification event
         event(new Registered($user));

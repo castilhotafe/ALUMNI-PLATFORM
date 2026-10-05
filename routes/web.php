@@ -35,19 +35,23 @@ Route::middleware('guest')->group(function () {
         ->name('password.store');
 });
 
-Route::get('/verify-email/{id}/{hash}', VerifyEmailController::class)
-    ->middleware(['auth', 'signed'])
-    ->name('verification.verify');
+// Auth Routes (Only for logged-in users)
+Route::middleware('auth')->group(function () {
+    Route::get('verify-email', EmailVerificationPromptController::class)
+        ->name('verification.notice');
 
-Route::get('/verify-email', EmailVerificationPromptController::class)
-    ->middleware('auth')
-    ->name('verification.notice');
+    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
 
-Route::post('/email/verification-notification', EmailVerificationNotificationController::class)
-    ->middleware(['auth', 'throttle:6,1'])
-    ->name('verification.send');
+    Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
+
+    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+});
 
 // Authenticated and Verified Routes (Only for logged-in users with verified email)
-Route::middleware(['', ''])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
 });

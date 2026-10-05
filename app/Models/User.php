@@ -17,6 +17,7 @@ use Spatie\Permission\Traits\HasRoles;
     'email',
     'password',
     'password_confirmed_at',
+    'email_verified_at',
     'student_id',
     'isCurrent',
     'isAlumni',
@@ -33,11 +34,6 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
-
-    public function profile(): HasOne
-    {
-        return $this->hasOne(Profile::class);
-    }
 
     public function selfDeclaredRoleLabel(): ?string
     {
