@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('project_id')->constrained()->cascadeOnDelete();
             $table->unsignedInteger('author_order');
+            $table->string('contribution_role')->nullable();
             $table->timestamps();
 
             $table->unique(['user_id', 'project_id']);

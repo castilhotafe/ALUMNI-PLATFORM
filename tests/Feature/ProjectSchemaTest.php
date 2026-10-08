@@ -21,6 +21,7 @@ test('project migrations provide the required schema', function () {
             'user_id',
             'project_id',
             'author_order',
+            'contribution_role',
             'created_at',
             'updated_at',
         ]))->toBeTrue();
