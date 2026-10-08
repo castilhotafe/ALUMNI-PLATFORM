@@ -1,0 +1,225 @@
+// ============================================================================
+// AUTHENTICATION LAYOUT
+// ============================================================================
+
+// NOTE: variables and mixins are imported by app.scss via @import
+// to maintain backward compatibility with @import-based partials.
+
+// Base HTML and Body
+html, body {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    @include gradient-bg($nmtafe-light, $color-white);
+    min-height: 100vh;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    @include flex(column);
+    font-family: $font-family-base;
+}
+
+// Auth Container (flexbox wrapper)
+.auth-container {
+    flex: 1;
+    @include flex-center;
+    padding: $spacing-xl $spacing-md;
+}
+
+// Auth Card (white centered form container)
+.auth-card {
+    background: $color-white;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-lg;
+    width: 100%;
+    max-width: 450px;
+    padding: $spacing-2xl $spacing-xl;
+
+    @media (max-width: 576px) {
+        max-width: 100%;
+        padding: $spacing-xl $spacing-md;
+    }
+}
+
+// Auth Header (title and subtitle)
+.auth-header {
+    text-align: center;
+    margin-bottom: $spacing-xl;
+
+    h1 {
+        font-size: $font-size-2xl;
+        font-weight: $font-weight-bold;
+        color: $nmtafe-red;
+        margin-bottom: $spacing-sm;
+        margin-top: 0;
+    }
+
+    p {
+        color: $color-text-secondary;
+        font-size: $font-size-base;
+        margin: 0;
+    }
+
+    // Optional logo styling
+    .auth-logo {
+        width: 50px;
+        height: auto;
+        margin-bottom: $spacing-md;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+// Form Wrapper
+form {
+    // Default form margin between elements
+    .form-group {
+        margin-bottom: $spacing-md;
+    }
+
+    // Submit button margin
+    .btn {
+        margin-bottom: $spacing-md;
+    }
+}
+
+// Auth Divider (horizontal line with text)
+.auth-divider {
+    text-align: center;
+    margin: $spacing-lg 0;
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 100%;
+        height: 1px;
+        background: $color-border;
+    }
+
+    span {
+        position: relative;
+        background: $color-white;
+        padding: 0 $spacing-md;
+        color: $color-text-secondary;
+        font-size: $font-size-sm;
+    }
+}
+
+// Auth Footer (signup/login links)
+.auth-footer {
+    text-align: center;
+    margin-top: $spacing-lg;
+
+    p {
+        margin: 0;
+        color: $color-text-secondary;
+        font-size: $font-size-sm;
+    }
+
+    a {
+        color: $nmtafe-red;
+        text-decoration: none;
+        font-weight: $font-weight-semibold;
+        @include transition(color);
+
+        &:hover {
+            color: $nmtafe-dark-red;
+            text-decoration: underline;
+        }
+
+        // Icon spacing in links
+        i {
+            margin-right: $spacing-sm;
+        }
+    }
+}
+
+// Auth Link (secondary links)
+.text-link-secondary {
+    color: $nmtafe-red !important;
+
+    &:hover {
+        color: $nmtafe-dark-red !important;
+    }
+}
+
+// Alert Messages
+.alert {
+    border-radius: $radius-md;
+    margin-bottom: $spacing-md;
+    border: none;
+
+    i {
+        margin-right: $spacing-sm;
+    }
+
+    // Danger alert (errors)
+    &.alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border-left: 4px solid $color-error;
+
+        strong {
+            font-weight: $font-weight-bold;
+        }
+
+        div {
+            margin-top: $spacing-xs;
+            font-size: $font-size-sm;
+        }
+    }
+
+    // Success alert
+    &.alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border-left: 4px solid $color-success;
+    }
+
+    // Info alert
+    &.alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border-left: 4px solid $color-info;
+    }
+
+    // Warning alert
+    &.alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border-left: 4px solid $color-warning;
+    }
+
+    // Dismiss button
+    .btn-close {
+        @include transition(opacity);
+
+        &:hover {
+            opacity: 0.7;
+        }
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+    .auth-container {
+        padding: $spacing-lg $spacing-md;
+    }
+
+    .auth-card {
+        padding: $spacing-xl $spacing-md;
+    }
+
+    .auth-header {
+        margin-bottom: $spacing-lg;
+
+        h1 {
+            font-size: 1.5rem;
+        }
+    }
+}
