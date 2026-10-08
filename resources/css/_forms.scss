@@ -1,0 +1,170 @@
+// ============================================================================
+// FORMS
+// ============================================================================
+
+// NOTE: variables and mixins are imported by app.scss via @import
+// to maintain backward compatibility with @import-based partials.
+
+// Form Label
+.form-label {
+    font-weight: $font-weight-semibold;
+    color: $color-text-dark;
+    margin-bottom: $spacing-sm;
+    display: block;
+}
+
+// Form Control (text input, email, password, etc.)
+.form-control {
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-base;
+    font-family: $font-family-base;
+    @include transition(all);
+
+    &:focus {
+        @include focus-ring($nmtafe-gray);
+    }
+
+    &::placeholder {
+        color: #bbb;
+    }
+
+    // Validation states
+    &.is-invalid {
+        border-color: $color-error;
+
+        &:focus {
+            @include focus-ring($color-error);
+        }
+    }
+
+    &.is-valid {
+        border-color: $color-success;
+
+        &:focus {
+            @include focus-ring($color-success);
+        }
+    }
+}
+
+// Form Select
+.form-select {
+    @include transition(all);
+
+    &:focus {
+        @include focus-ring($nmtafe-gray);
+    }
+}
+
+// Form Group (label + input wrapper)
+.form-group {
+    margin-bottom: $spacing-md;
+}
+
+// Form Row (for side-by-side inputs)
+.form-row {
+    @include grid(2, $spacing-md);
+
+    @media (max-width: 576px) {
+        @include grid(1, $spacing-md);
+    }
+}
+
+// Checkbox NMTAFE Style
+.checkbox-nmtafe {
+    @include flex(row, center);
+
+    input[type="checkbox"] {
+        width: 1rem;
+        height: 1rem;
+        border: 1px solid $color-border;
+        border-radius: $radius-sm;
+        cursor: pointer;
+        accent-color: $nmtafe-gray;
+        @include transition(all);
+
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba($nmtafe-gray, 0.25);
+        }
+
+        &:checked {
+            background-color: $nmtafe-gray;
+            border-color: $nmtafe-gray;
+        }
+    }
+
+    label {
+        margin-left: $spacing-sm;
+        margin-bottom: 0;
+        cursor: pointer;
+        color: $color-text-secondary;
+        font-size: $font-size-base;
+        user-select: none;
+    }
+}
+
+// Radio Button NMTAFE Style
+.radio-nmtafe {
+    @include flex(row, center);
+
+    input[type="radio"] {
+        width: 1rem;
+        height: 1rem;
+        border: 1px solid $color-border;
+        border-radius: 50%;
+        cursor: pointer;
+        accent-color: $nmtafe-gray;
+        @include transition(all);
+
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba($nmtafe-gray, 0.25);
+        }
+
+        &:checked {
+            background-color: $nmtafe-gray;
+            border-color: $nmtafe-gray;
+        }
+    }
+
+    label {
+        margin-left: $spacing-sm;
+        margin-bottom: 0;
+        cursor: pointer;
+        color: $color-text-secondary;
+        font-size: $font-size-base;
+        user-select: none;
+    }
+}
+
+// Invalid Feedback
+.invalid-feedback {
+    display: block;
+    color: $color-error;
+    font-size: $font-size-sm;
+    margin-top: $spacing-xs;
+}
+
+// Valid Feedback
+.valid-feedback {
+    display: block;
+    color: $color-success;
+    font-size: $font-size-sm;
+    margin-top: $spacing-xs;
+}
+
+// Text Error
+.text-error {
+    color: $color-error;
+    font-size: $font-size-base;
+}
+
+// Form Hint Text
+.form-hint {
+    display: block;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    margin-top: $spacing-xs;
+}
