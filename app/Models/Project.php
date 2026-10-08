@@ -17,7 +17,7 @@ class Project extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_projects')
-            ->withPivot('author_order')
+            ->withPivot('author_order', 'contribution_role')
             ->withTimestamps()
             ->orderByPivot('author_order');
     }
