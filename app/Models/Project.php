@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
     'title',
     'description',
     'repo_url',
-    'demo_url',
     'visibility',
 ])]
 class Project extends Model
