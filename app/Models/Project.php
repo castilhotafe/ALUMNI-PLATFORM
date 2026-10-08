@@ -35,4 +35,18 @@ class Project extends Model
     {
         return $this->hasMany(ProjectCollaborator::class);
     }
+
+    public function scopeVisibleTo($query, $user)
+    {
+        return $query->where(function ($q) use ($user) {
+            $q->where('visibility', strtolower('public'));
+
+            if ($user) {
+                $q->orWhere(function ($innerQuery) use ($user) {
+                    $innerQuery->where('visibility', strtolower('private'))
+                        ->whereHas('users', fn ($userQuery) => $userQuery->whereKey($user->id));
+                });
+            }
+        });
+    }
 }
