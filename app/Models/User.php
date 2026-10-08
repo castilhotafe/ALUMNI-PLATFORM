@@ -7,7 +7,6 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -17,6 +16,7 @@ use Spatie\Permission\Traits\HasRoles;
     'email',
     'password',
     'password_confirmed_at',
+    'email_verified_at',
     'student_id',
     'isCurrent',
     'isAlumni',
@@ -33,11 +33,6 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
-
-    public function profile(): HasOne
-    {
-        return $this->hasOne(Profile::class);
-    }
 
     public function selfDeclaredRoleLabel(): ?string
     {
