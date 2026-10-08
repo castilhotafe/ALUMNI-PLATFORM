@@ -17,7 +17,8 @@ class StoreProjectRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        // Allow all authenticated users to create projects
+        return true;
     }
 
     /**
@@ -33,7 +34,6 @@ class StoreProjectRequest extends FormRequest
             'repo_url' => ['nullable', 'url', 'max:255'],
             'visibility' => ['required', 'string', 'in:public,private'],
             'collaborators' => ['nullable', 'array'],
-            'collaborators.*' => ['array:name,role'],
             'collaborators.*.name' => ['nullable', 'string', 'max:255'],
             'collaborators.*.role' => ['nullable', 'string', 'max:255'],
             'profile_bio' => ['nullable', 'string', 'max:1000'],
