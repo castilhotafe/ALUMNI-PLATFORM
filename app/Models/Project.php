@@ -2,18 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[Fillable([
-    'title',
-    'description',
-    'repo_url',
-    'visibility',
-])]
 class Project extends Model
 {
+    use HasFactory;
+
+    protected $fillable = [
+        'title',
+        'description',
+        'repo_url',
+        'visibility',
+    ];
+
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_projects')
