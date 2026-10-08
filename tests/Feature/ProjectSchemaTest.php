@@ -12,7 +12,6 @@ test('project migrations provide the required schema', function () {
         'title',
         'description',
         'repo_url',
-        'demo_url',
         'visibility',
         'created_at',
         'updated_at',
@@ -30,14 +29,12 @@ test('project migrations provide the required schema', function () {
         'title' => 'Alumni Portfolio',
         'description' => 'A public project created by alumni.',
         'repo_url' => 'https://github.com/example/alumni-portfolio',
-        'demo_url' => 'https://alumni-portfolio.example.com',
         'visibility' => 'public',
     ]);
 
     $this->assertDatabaseHas('projects', [
         'id' => $project->getKey(),
         'repo_url' => 'https://github.com/example/alumni-portfolio',
-        'demo_url' => 'https://alumni-portfolio.example.com',
         'visibility' => 'public',
     ]);
 });

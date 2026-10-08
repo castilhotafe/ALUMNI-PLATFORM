@@ -13,7 +13,6 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->string('repo_url')->nullable();
-            $table->string('demo_url')->nullable();
             $table->enum('visibility', ['public', 'private']);
             $table->timestamps();
         });
