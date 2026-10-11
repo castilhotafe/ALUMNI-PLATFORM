@@ -143,4 +143,22 @@ class PaperControllerScopeTest extends TestCase
         $this->assertSame([], $paper->fresh()->profile->details);
         $this->assertSame($user->name, $paper->authors()->sole()->name);
     }
+
+    public function test_destroy_deletes_paper_and_related_records(): void
+    {
+        $user = User::factory()->create();
+        $paper = ResearchPaper::factory()->create();
+        $paper->users()->attach($user->id, ['author_order' => 1]);
+        $paper->authors()->create(['name' => $user->name, 'author_order' => 1]);
+        $paper->profile()->create(['bio' => 'Paper details.']);
+
+        $response = (new PaperController)->destroy($paper);
+
+        $this->assertSame(302, $response->getStatusCode());
+        $this->assertSame('Research paper deleted.', session('status'));
+        $this->assertDatabaseMissing('research_papers', ['id' => $paper->id]);
+        $this->assertDatabaseMissing('user_papers', ['research_paper_id' => $paper->id]);
+        $this->assertDatabaseMissing('research_paper_authors', ['research_paper_id' => $paper->id]);
+        $this->assertDatabaseMissing('research_paper_profiles', ['research_paper_id' => $paper->id]);
+    }
 }
