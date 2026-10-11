@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Http\Controllers\PaperController;
 use App\Http\Requests\StorePaperRequest;
+use App\Http\Requests\UpdatePaperRequest;
 use App\Models\ResearchPaper;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
@@ -91,5 +92,55 @@ class PaperControllerScopeTest extends TestCase
         $this->assertSame(1, $paper->authors()->count());
         $this->assertSame('dr. jane doe', $paper->authors()->sole()->name);
         $this->assertNull($paper->profile);
+    }
+
+    public function test_update_replaces_coauthors_and_updates_existing_profile(): void
+    {
+        $user = User::factory()->create(['name' => 'Dr. Jane Doe']);
+        $paper = ResearchPaper::factory()->create();
+        $paper->users()->attach($user->id, ['author_order' => 1]);
+        $paper->authors()->create(['name' => 'Old Author', 'author_order' => 2]);
+        $paper->profile()->create(['bio' => 'Old bio', 'details' => ['Chemistry']]);
+        $request = $this->paperRequest(UpdatePaperRequest::class, [
+            'title' => 'Updated Title',
+            'abstract' => 'Updated abstract.',
+            'visibility' => 'private',
+            'authors' => [['name' => 'New Author', 'order' => 3], ['name' => '']],
+            'profile_bio' => 'New bio',
+            'profile_details' => ['Biology', ''],
+        ], $user);
+
+        $response = (new PaperController)->update($request, $paper);
+        $paper->refresh();
+
+        $this->assertSame(302, $response->getStatusCode());
+        $this->assertSame('Research paper updated.', session('status'));
+        $this->assertSame('Updated Title', $paper->title);
+        $this->assertSame('Updated abstract.', $paper->abstract);
+        $this->assertSame('private', $paper->visibility);
+        $this->assertSame(['Dr. Jane Doe', 'New Author'], $paper->authors()->orderBy('author_order')->pluck('name')->all());
+        $this->assertSame([1, 3], $paper->authors()->orderBy('author_order')->pluck('author_order')->all());
+        $this->assertSame('New bio', $paper->profile->bio);
+        $this->assertSame(['Biology'], $paper->profile->details);
+        $this->assertSame(1, $paper->users()->sole()->pivot->author_order);
+    }
+
+    public function test_update_creates_optional_profile_when_it_is_missing(): void
+    {
+        $user = User::factory()->create();
+        $paper = ResearchPaper::factory()->create();
+        $paper->users()->attach($user->id, ['author_order' => 1]);
+        $request = $this->paperRequest(UpdatePaperRequest::class, [
+            'title' => 'Updated Paper',
+            'abstract' => 'Updated abstract.',
+            'visibility' => 'public',
+            'picture_url' => 'https://example.com/paper.png',
+        ], $user);
+
+        (new PaperController)->update($request, $paper);
+
+        $this->assertSame('https://example.com/paper.png', $paper->fresh()->profile->picture_url);
+        $this->assertSame([], $paper->fresh()->profile->details);
+        $this->assertSame($user->name, $paper->authors()->sole()->name);
     }
 }
