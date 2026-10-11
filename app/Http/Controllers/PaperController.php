@@ -99,4 +99,11 @@ class PaperController extends Controller
 
         return back()->with('status', 'Research paper updated.');
     }
+
+    public function destroy(ResearchPaper $paper): RedirectResponse
+    {
+        $paper->delete();
+
+        return back()->with('status', 'Research paper deleted.');
+    }
 }
