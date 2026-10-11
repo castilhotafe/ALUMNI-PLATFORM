@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ResearchPaper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class PlatformController extends Controller
 {
@@ -64,5 +66,61 @@ class PlatformController extends Controller
         }
 
         return true;
+    }
+
+    public function papers(Request $request): View
+    {
+        $user = $request->user();
+        $search = $this->searchQuery($request);
+        $selectedDetails = $this->selectedDetails($request);
+        $allPapers = ResearchPaper::with(['users.profile', 'authors', 'profile'])
+            ->visibleTo($user)
+            ->withCount('authors')
+            ->latest()
+            ->get();
+
+        $papers = $allPapers
+            ->filter(fn ($paper) => $this->matchesSearch([
+                $paper->title,
+                $paper->abstract,
+                $paper->doi,
+                $paper->profile?->bio,
+                $paper->profile?->details ?? [],
+                $paper->authors?->pluck('name') ?? [],
+            ], $search, $selectedDetails))
+            ->values();
+        $userPapers = $user->researchPapers()
+            ->with(['authors', 'profile'])
+            ->withCount('authors')
+            ->orderByDesc('research_papers.created_at')
+            ->get()
+            ->filter(fn ($paper) => $this->matchesSearch([
+                $paper->title,
+                $paper->abstract,
+                $paper->doi,
+                $paper->profile?->bio,
+                $paper->profile?->details ?? [],
+                $paper->authors?->pluck('name') ?? [],
+            ], $search, $selectedDetails))
+            ->values();
+
+        $detailOptions = $allPapers
+            ->flatMap(fn ($paper) => $paper->profile?->details ?? [])
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        return view('platform.section', [
+            'section' => 'papers',
+            'pageTitle' => 'Research Papers',
+            'sectionKicker' => 'Knowledge sharing',
+            'papers' => $papers,
+            'userPapers' => $userPapers,
+            'searchQuery' => $search,
+            'selectedDetails' => $selectedDetails,
+            'detailOptions' => $detailOptions,
+        ]);
     }
 }
