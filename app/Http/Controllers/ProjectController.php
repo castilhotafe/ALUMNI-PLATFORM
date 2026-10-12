@@ -10,9 +10,6 @@ use Illuminate\Support\Arr;
 
 class ProjectController extends Controller
 {
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreProjectRequest $request): RedirectResponse
     {
         $validated = $request->validated();
@@ -79,6 +76,7 @@ class ProjectController extends Controller
         }
 
         $project->collaborators()->delete();
+
         if ($collaborators->isNotEmpty()) {
             $project->collaborators()->createMany($collaborators->values()->all());
         }
@@ -101,14 +99,10 @@ class ProjectController extends Controller
         return back()->with('status', 'Project updated.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Project $project): RedirectResponse
     {
         $project->delete();
 
         return back()->with('status', 'Project deleted.');
     }
-
 }
