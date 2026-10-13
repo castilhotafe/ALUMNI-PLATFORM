@@ -1,9 +1,3 @@
-<?php
-// Temporary variables to avoid "undefined variable" errors in the view
-$projects = $projects ?? collect();
-$userProjects = $userProjects ?? collect();
-?>
-
 @extends('layouts.platform')
 
 @section('content')
@@ -73,8 +67,7 @@ $userProjects = $userProjects ?? collect();
                             </ul>
                         </div>
                     @endif
-                    {{-- projects.store action --}}
-                    <form method="POST" action="" class="row g-3">
+                    <form method="POST" action="{{ route('projects.store') }}" class="row g-3">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Project title</label>
@@ -250,8 +243,7 @@ $userProjects = $userProjects ?? collect();
                     <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
                         <div class="small text-secondary">{{ $project->repo_url ?? 'Repository link not shared' }}</div>
                         <div class="d-flex gap-2">
-                            {{-- projects.destroy, $project action --}}
-                            <form method="POST" action="" class="m-0">
+                            <form method="POST" action="{{ route('projects.destroy', $project) }}" class="m-0">
                                 <button type="button" class="btn btn-light btn-sm border"
                                     data-toggle-target="project-edit-{{ $project->id }}" data-toggle-open-text="Edit"
                                     data-toggle-close-text="Close" aria-expanded="false">
@@ -268,8 +260,7 @@ $userProjects = $userProjects ?? collect();
             </div>
             <div class="nmtafe-masonry-span collapse" id="project-edit-{{ $project->id }}">
                 <div class="nmtafe-card bg-white rounded-4 p-4 border">
-                    {{-- projects.store, $project action --}}
-                    <form method="POST" action="" class="row g-2">
+                    <form method="POST" action="{{ route('projects.update', $project) }}" class="row g-2">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                         @method('PATCH')
                         <div class="col-12">
