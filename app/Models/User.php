@@ -29,7 +29,7 @@ use Spatie\Permission\Traits\HasRoles;
 ])]
 #[Hidden(['password', 'remember_token'])]
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable // implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
