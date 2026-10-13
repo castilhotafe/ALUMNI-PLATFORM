@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Project;
 use App\Models\ResearchPaper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -66,6 +67,61 @@ class PlatformController extends Controller
         }
 
         return true;
+    }
+
+    public function projects(Request $request): View
+    {
+        $user = $request->user();
+        $search = $this->searchQuery($request);
+        $selectedDetails = $this->selectedDetails($request);
+        $allProjects = Project::with(['users.profile', 'collaborators', 'profile'])
+            ->visibleTo($user)
+            ->withCount('collaborators')
+            ->latest()
+            ->get();
+
+        $projects = $allProjects
+            ->filter(fn ($project) => $this->matchesSearch([
+                $project->title,
+                $project->description,
+                $project->profile?->bio,
+                $project->profile?->details ?? [],
+                $project->users?->pluck('name') ?? [],
+            ], $search, $selectedDetails))
+            ->values();
+
+        $userProjects = $user->projects()
+            ->with(['collaborators', 'profile'])
+            ->withCount('collaborators')
+            ->orderByDesc('projects.created_at')
+            ->get()
+            ->filter(fn ($project) => $this->matchesSearch([
+                $project->title,
+                $project->description,
+                $project->profile?->bio,
+                $project->profile?->details ?? [],
+                $project->collaborators?->pluck('name') ?? [],
+            ], $search, $selectedDetails))
+            ->values();
+
+        $detailOptions = $allProjects
+            ->flatMap(fn ($project) => $project->profile?->details ?? [])
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        return view('platform.section', [
+            'section' => 'projects',
+            'pageTitle' => 'Projects',
+            'sectionKicker' => 'Collaboration',
+            'projects' => $projects,
+            'userProjects' => $userProjects,
+            'searchQuery' => $search,
+            'selectedDetails' => $selectedDetails,
+            'detailOptions' => $detailOptions,
+        ]);
     }
 
     public function papers(Request $request): View
