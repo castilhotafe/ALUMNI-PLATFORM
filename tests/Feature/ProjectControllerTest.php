@@ -143,3 +143,20 @@ it('updates a project and completely refreshes collaborators and profiles', func
         ->and($project->fresh()->profile->bio)->toBe('Updated Bio String')
         ->and($project->fresh()->profile->details)->toEqual(['React']);
 });
+
+/*
+|--------------------------------------------------------------------------
+| Destroy Method Tests
+|--------------------------------------------------------------------------
+*/
+
+it('deletes the specified project', function () {
+    $project = Project::factory()->create();
+
+    $response = $this->delete(route('projects.destroy', $project));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('status', 'Project deleted.');
+
+    $this->assertDatabaseMissing('projects', ['id' => $project->id]);
+});
