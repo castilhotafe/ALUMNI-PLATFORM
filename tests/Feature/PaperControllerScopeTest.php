@@ -226,3 +226,44 @@ it('stores a research paper with correct author orders and profiles', function (
     // Profile asserts
     expect($paper->profile->details)->toEqual(['Physics', 'Quantum']);
 });
+
+/*
+|--------------------------------------------------------------------------
+| Update Method Tests
+|--------------------------------------------------------------------------
+*/
+
+it('updates a paper and manages relationship sync changes', function () {
+    $paper = ResearchPaper::factory()->create(['title' => 'Initial Title']);
+    $paper->users()->attach($this->user->id, ['author_order' => 1]); // Mocking ownership context
+    $paper->authors()->create(['name' => 'Old Legacy Co-Author', 'author_order' => 2]);
+    $paper->profile()->create(['bio' => 'Old Abstract Bio', 'details' => ['Chemistry']]);
+
+    $updatePayload = [
+        'title' => 'Updated Final Title',
+        'abstract' => 'Rewritten abstract summary.',
+        'doi' => '10.1000/new-doi',
+        'pdf_url' => 'https://example.edu',
+        'visibility' => 'private',
+        'authors' => [
+            ['name' => 'Dr. New Expert', 'order' => 5],
+        ],
+        'profile_bio' => 'Refreshed Profile bio text',
+        'profile_details' => ['Biology'],
+    ];
+
+    $response = $this->patch(route('papers.update', $paper), $updatePayload);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('status', 'Research paper updated.');
+
+    expect($paper->fresh()->title)->toBe('Updated Final Title');
+
+    // Assert stale author relation was wiped out and new context generated
+    $this->assertDatabaseMissing('research_paper_authors', ['name' => 'Old Legacy Co-Author']);
+    expect($paper->authors()->get())->toHaveCount(2); // Dr. New Expert + Logged-in Prepend Owner
+
+    // Profile replacement validation
+    expect($paper->fresh()->profile->bio)->toBe('Refreshed Profile bio text')
+        ->and($paper->fresh()->profile->details)->toEqual(['Biology']);
+});
