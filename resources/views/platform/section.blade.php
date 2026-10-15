@@ -1,0 +1,21 @@
+@extends('layouts.platform')
+
+@section('content')
+    @if ($section === 'dashboard')
+        @include('platform.sections.dashboard')
+    @elseif ($section === 'me')
+        @include('platform.sections.profile')
+    @elseif ($section === 'directory')
+        @include('platform.sections.developer-directory')
+    @elseif ($section === 'projects')
+        @include('platform.sections.projects')
+    @elseif ($section === 'papers')
+        @include('platform.sections.research-papers')
+    @elseif ($section === 'networking')
+        @include('platform.sections.networking')
+    @elseif ($section === 'discover')
+        @include('platform.sections.discover')
+    @elseif ($section === 'messages')
+        @include('platform.sections.messages')
+    @endif
+@endsection
