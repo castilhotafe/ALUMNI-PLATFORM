@@ -366,3 +366,134 @@
             </div>
         @endforelse
     </div>
+
+    <script>
+        (() => {
+            const publicList = document.getElementById('paper-public-list');
+            const manageList = document.getElementById('paper-manage-list');
+            const tabButtons = document.querySelectorAll('#paperHeaderTabs [data-bs-toggle="tab"]');
+
+            const initCollapseToggles = () => {
+                document.querySelectorAll('[data-toggle-target]').forEach((button) => {
+                    const targetId = button.getAttribute('data-toggle-target');
+                    const target = document.getElementById(targetId);
+                    if (!target) return;
+
+                    const openText = button.getAttribute('data-toggle-open-text');
+                    const closeText = button.getAttribute('data-toggle-close-text');
+
+                    const setButtonState = (isOpen) => {
+                        button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                        if (openText && closeText) {
+                            button.textContent = isOpen ? closeText : openText;
+                        }
+                    };
+
+                    setButtonState(target.classList.contains('show'));
+
+                    button.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        const isOpen = target.classList.contains('show');
+                        target.classList.toggle('show', !isOpen);
+                        setButtonState(!isOpen);
+                    });
+                });
+            };
+
+            const addAuthorRow = (container) => {
+                const index = Number(container.dataset.nextIndex || 0);
+                container.dataset.nextIndex = String(index + 1);
+
+                const row = document.createElement('div');
+                row.className = 'row g-2 author-row';
+                row.innerHTML = `
+                    <div class="col-md-7">
+                        <input type="text" name="authors[${index}][name]" class="form-control" placeholder="Author name">
+                    </div>
+                    <div class="col">
+                        <input type="number" min="1" name="authors[${index}][order]" class="form-control" placeholder="Order" value="${index + 1}">
+                    </div>
+                    <div class="col-auto text-end">
+                        <button type="button" class="btn btn-sm btn-outline-secondary remove-author">Remove</button>
+                    </div>
+                `;
+
+                container.appendChild(row);
+            };
+
+            const addDetailRow = (container) => {
+                const index = Number(container.dataset.nextIndex || 0);
+                container.dataset.nextIndex = String(index + 1);
+
+                const row = document.createElement('div');
+                row.className = 'row g-2 detail-row';
+                row.innerHTML = `
+                    <div class="col">
+                        <input type="text" name="profile_details[${index}]" class="form-control" placeholder="Detail">
+                    </div>
+                    <div class="col-auto text-end">
+                        <button type="button" class="btn btn-sm btn-outline-secondary remove-detail">Remove</button>
+                    </div>
+                `;
+
+                container.appendChild(row);
+            };
+
+            document.addEventListener('click', (event) => {
+                const addBtn = event.target.closest('[data-add-author]');
+                if (addBtn) {
+                    event.preventDefault();
+                    const targetId = addBtn.getAttribute('data-add-author');
+                    const container = document.getElementById(targetId);
+                    if (container) {
+                        addAuthorRow(container);
+                    }
+                    return;
+                }
+
+                const addDetailBtn = event.target.closest('[data-add-detail]');
+                if (addDetailBtn) {
+                    event.preventDefault();
+                    const targetId = addDetailBtn.getAttribute('data-add-detail');
+                    const container = document.getElementById(targetId);
+                    if (container) {
+                        addDetailRow(container);
+                    }
+                    return;
+                }
+
+                if (event.target.classList.contains('remove-author')) {
+                    event.preventDefault();
+                    event.target.closest('.author-row')?.remove();
+                    return;
+                }
+
+                if (event.target.classList.contains('remove-detail')) {
+                    event.preventDefault();
+                    event.target.closest('.detail-row')?.remove();
+                }
+            });
+
+            if (!publicList || !manageList || !tabButtons.length) {
+                return;
+            }
+
+            const setListVisibility = (targetId) => {
+                const showManage = targetId === '#paper-manage-pane';
+                publicList.classList.toggle('d-none', showManage);
+                manageList.classList.toggle('d-none', !showManage);
+            };
+
+            tabButtons.forEach((button) => {
+                button.addEventListener('shown.bs.tab', (event) => {
+                    setListVisibility(event.target.getAttribute('data-bs-target'));
+                });
+            });
+
+            initCollapseToggles();
+
+            const initialTab = @json($headerTab);
+            setListVisibility(`#paper-${initialTab}-pane`);
+        })();
+    </script>
+@endsection
