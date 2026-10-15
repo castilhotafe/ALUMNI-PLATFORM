@@ -220,3 +220,149 @@
             </div>
         @endforelse
     </div>
+
+    <div class="nmtafe-masonry {{ $headerTab === 'manage' ? '' : 'd-none' }}" id="paper-manage-list">
+        @forelse ($userPapers as $paper)
+            <div class="nmtafe-masonry-item">
+                <div class="nmtafe-card bg-white rounded-4 p-4">
+                    @if ($paper->profile?->picture_url)
+                        <img src="{{ $paper->profile->picture_url }}" alt="{{ $paper->title }} cover"
+                            class="nmtafe-hero rounded-3 mb-3">
+                    @endif
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="fw-semibold">{{ $paper->title }}</div>
+                        <span class="badge text-bg-light">{{ $paper->authors_count }} Authors</span>
+                    </div>
+                    <p class="text-secondary">{{ $paper->abstract }}</p>
+                    @if ($paper->profile?->bio)
+                        <p class="text-secondary small mb-2">{{ $paper->profile->bio }}</p>
+                    @endif
+                    @if (!empty($paper->profile?->details))
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            @foreach ($paper->profile->details as $detail)
+                                <span
+                                    class="badge rounded-pill text-bg-light text-danger small">{{ $detail }}</span>
+                            @endforeach
+                        </div>
+                    @endif
+                    <div class="small text-secondary mb-3">
+                        <div>DOI: {{ $paper->doi ?? 'Not published' }}</div>
+                        <div>PDF: {{ $paper->pdf_url ?? 'Not attached' }}</div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <form method="POST" action="{{ route('papers.destroy', $paper) }}" class="m-0">
+                            <button type="button" class="btn btn-light btn-sm border"
+                                data-toggle-target="paper-edit-{{ $paper->id }}" data-toggle-open-text="Edit"
+                                data-toggle-close-text="Close" aria-expanded="false">
+                                Edit
+                            </button>
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="nmtafe-masonry-span collapse" id="paper-edit-{{ $paper->id }}">
+                <div class="nmtafe-card bg-white rounded-4 p-4 border">
+                    <form method="POST" action="{{ route('papers.update', $paper) }}" class="row g-2">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        @method('PATCH')
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Paper title</label>
+                            <input type="text" name="title" class="form-control" value="{{ $paper->title }}"
+                                required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Abstract</label>
+                            <textarea name="abstract" class="form-control" rows="3" required>{{ $paper->abstract }}</textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Profile Summary</label>
+                            <textarea name="profile_bio" class="form-control" rows="3" placeholder="Share a short profile summary">{{ $paper->profile?->bio }}</textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Profile picture URL</label>
+                            <input type="url" name="picture_url" class="form-control"
+                                value="{{ $paper->profile?->picture_url }}" placeholder="https://example.com/photo.jpg">
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between">
+                                <label class="form-label fw-semibold small mb-0">Details</label>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                    data-add-detail="paper-details-edit-{{ $paper->id }}">Add detail</button>
+                            </div>
+                            <div class="d-grid gap-2 mt-2" id="paper-details-edit-{{ $paper->id }}"
+                                data-next-index="{{ count($paper->profile?->details ?? []) }}">
+                                @forelse ($paper->profile?->details ?? [] as $index => $detail)
+                                    <div class="row g-2 detail-row">
+                                        <div class="col">
+                                            <input type="text" name="profile_details[{{ $index }}]"
+                                                class="form-control" value="{{ $detail }}" placeholder="Detail">
+                                        </div>
+                                        <div class="col-auto text-end">
+                                            <button type="button"
+                                                class="btn btn-sm btn-outline-secondary remove-detail">Remove</button>
+                                        </div>
+                                    </div>
+                                @empty
+                                @endforelse
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <label class="form-label fw-semibold small mb-0">Authors</label>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                    data-add-author="authors-edit-{{ $paper->id }}">Add author</button>
+                            </div>
+                            <div class="d-grid gap-2 mt-2" id="authors-edit-{{ $paper->id }}"
+                                data-next-index="{{ $paper->authors->count() }}">
+                                @forelse ($paper->authors->sortBy('author_order')->values() as $index => $author)
+                                    <div class="row g-2 author-row">
+                                        <div class="col-md-7">
+                                            <input type="text" name="authors[{{ $index }}][name]"
+                                                class="form-control" value="{{ $author->name }}"
+                                                placeholder="Author name">
+                                        </div>
+                                        <div class="col">
+                                            <input type="number" min="1"
+                                                name="authors[{{ $index }}][order]" class="form-control"
+                                                value="{{ $author->author_order }}" placeholder="Order">
+                                        </div>
+                                        <div class="col-auto text-end">
+                                            <button type="button"
+                                                class="btn btn-sm btn-outline-secondary remove-author">Remove</button>
+                                        </div>
+                                    </div>
+                                @empty
+                                @endforelse
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">DOI</label>
+                            <input type="text" name="doi" class="form-control" value="{{ $paper->doi }}"
+                                placeholder="10.1234/example">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">PDF URL</label>
+                            <input type="url" name="pdf_url" class="form-control" value="{{ $paper->pdf_url }}"
+                                placeholder="https://...">
+                        </div>
+                        <div class="col-12 d-flex align-items-center justify-content-between">
+                            <select name="visibility" class="form-select w-auto">
+                                <option value="public" @selected($paper->visibility === 'public')>Public</option>
+                                <option value="private" @selected($paper->visibility === 'private')>Private</option>
+                            </select>
+                            <button class="btn btn-danger btn-sm" type="submit">Save changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @empty
+            <div class="col-12">
+                <div class="alert alert-light border">
+                    {{ !empty($searchQuery) ? 'No managed papers match your search.' : 'You have not created any research papers yet.' }}
+                </div>
+            </div>
+        @endforelse
+    </div>
