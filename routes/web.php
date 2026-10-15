@@ -80,6 +80,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/papers/{paper}', [PaperController::class, 'update'])->name('papers.update');
     Route::delete('/papers/{paper}', [PaperController::class, 'destroy'])->name('papers.destroy');
 
-
-
 });
