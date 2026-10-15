@@ -267,3 +267,20 @@ it('updates a paper and manages relationship sync changes', function () {
     expect($paper->fresh()->profile->bio)->toBe('Refreshed Profile bio text')
         ->and($paper->fresh()->profile->details)->toEqual(['Biology']);
 });
+
+/*
+|--------------------------------------------------------------------------
+| Destroy Method Tests
+|--------------------------------------------------------------------------
+*/
+
+it('deletes the specified research paper', function () {
+    $paper = ResearchPaper::factory()->create();
+
+    $response = $this->delete(route('papers.destroy', $paper));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('status', 'Research paper deleted.');
+
+    $this->assertDatabaseMissing('research_papers', ['id' => $paper->id]);
+});
