@@ -171,3 +171,52 @@
             </div>
         </div>
     </div>
+
+    @include('components.search-bar', [
+        'searchQuery' => $searchQuery ?? '',
+        'selectedDetails' => $selectedDetails ?? [],
+        'detailOptions' => $detailOptions ?? [],
+        'label' => 'Search papers',
+        'placeholder' => 'Search by title, abstract, DOI, author, or detail',
+        'buttonLabel' => 'Find Papers',
+        'inputId' => 'papers-search',
+    ])
+
+    <div class="nmtafe-masonry {{ $headerTab === 'manage' ? 'd-none' : '' }}" id="paper-public-list">
+        @forelse ($papers as $paper)
+            <div class="nmtafe-masonry-item">
+                <div class="nmtafe-card bg-white rounded-4 p-4">
+                    @if ($paper->profile?->picture_url)
+                        <img src="{{ $paper->profile->picture_url }}" alt="{{ $paper->title }} cover"
+                            class="nmtafe-hero rounded-3 mb-3">
+                    @endif
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="fw-semibold">{{ $paper->title }}</div>
+                        <span class="badge text-bg-light">{{ $paper->authors_count }} Authors</span>
+                    </div>
+                    <p class="text-secondary">{{ $paper->abstract }}</p>
+                    @if ($paper->profile?->bio)
+                        <p class="text-secondary small mb-2">{{ $paper->profile->bio }}</p>
+                    @endif
+                    @if (!empty($paper->profile?->details))
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            @foreach ($paper->profile->details as $detail)
+                                <span
+                                    class="badge rounded-pill text-bg-light text-danger small">{{ $detail }}</span>
+                            @endforeach
+                        </div>
+                    @endif
+                    <div class="small text-secondary mb-3">
+                        <div>DOI: {{ $paper->doi ?? 'Not published' }}</div>
+                        <div>PDF: {{ $paper->pdf_url ?? 'Not attached' }}</div>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="col-12 w-100" style="column-span: all;">
+                <div class="alert alert-light border">
+                    {{ !empty($searchQuery) ? 'No research papers match your search.' : 'Research papers will appear here once users add publications.' }}
+                </div>
+            </div>
+        @endforelse
+    </div>
