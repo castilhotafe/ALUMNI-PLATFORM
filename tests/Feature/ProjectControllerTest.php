@@ -103,3 +103,43 @@ it('does not create a profile if all profile fields are empty', function () {
     expect($project)->not->toBeNull()
         ->and($project->profile)->toBeNull();
 });
+
+/*
+|--------------------------------------------------------------------------
+| Update Method Tests
+|--------------------------------------------------------------------------
+*/
+
+it('updates a project and completely refreshes collaborators and profiles', function () {
+    // Arrange: Assign ownership to the authenticated user ($this->user)
+    $project = Project::factory()->create(['title' => 'Old Title']);
+    $project->users()->attach($this->user->id, ['contribution_role' => 'Owner']);
+
+    $project->collaborators()->create(['name' => 'Old Developer', 'role' => 'Helper']);
+    $project->profile()->create(['bio' => 'Old Bio', 'details' => ['Vue']]);
+
+    $updatePayload = [
+        'title' => 'Brand New Title',
+        'description' => 'An updated project description.',
+        'repo_url' => 'https://github.com',
+        'visibility' => 'public',
+        'collaborators' => [
+            ['name' => 'Alex Rivera', 'role' => 'Designer'],
+        ],
+        'profile_bio' => 'Updated Bio String',
+        'profile_details' => ['React'],
+    ];
+
+    $response = $this->patch(route('projects.update', $project), $updatePayload);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('status', 'Project updated.');
+
+    expect($project->fresh()->title)->toBe('Brand New Title');
+    $this->assertDatabaseMissing('project_collaborators', ['name' => 'Old Developer']);
+    expect($project->collaborators()->get())->toHaveCount(2);
+
+    expect($project->profile()->count())->toBe(1)
+        ->and($project->fresh()->profile->bio)->toBe('Updated Bio String')
+        ->and($project->fresh()->profile->details)->toEqual(['React']);
+});
