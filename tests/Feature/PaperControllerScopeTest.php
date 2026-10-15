@@ -13,18 +13,27 @@ use Mockery;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Tests\TestCase;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+
 
 // Pest does not set this PHPUnit subprocess bootstrap constant itself.
 if (! defined('PHPUNIT_COMPOSER_INSTALL')) {
-    define('PHPUNIT_COMPOSER_INSTALL', dirname(__DIR__, 2).'/vendor/autoload.php');
+    define('PHPUNIT_COMPOSER_INSTALL', dirname(__DIR__, 2) . '/vendor/autoload.php');
 }
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    // Set up authenticated environment and bypass CSRF checks
+    $this->user = User::factory()->create(['name' => 'Dr. Jane Doe']);
+    $this->actingAs($this->user);
+    $this->withoutMiddleware(PreventRequestForgery::class);
+    $this->withoutExceptionHandling();
+});
 
 #[RunTestsInSeparateProcesses]
 #[PreserveGlobalState(false)]
 class PaperControllerScopeTest extends TestCase
 {
-    use RefreshDatabase;
-
     private function paperRequest(string $class, array $payload, User $user): FormRequest
     {
         // Isolate controller behavior while the Form Requests from #42 are pending.
@@ -162,3 +171,58 @@ class PaperControllerScopeTest extends TestCase
         $this->assertDatabaseMissing('research_paper_profiles', ['research_paper_id' => $paper->id]);
     }
 }
+
+/*
+|--------------------------------------------------------------------------
+| Store Method Tests
+|--------------------------------------------------------------------------
+*/
+
+it('stores a research paper with correct author orders and profiles', function () {
+    $payload = [
+        'title' => 'Quantum Computing Implementations',
+        'abstract' => 'This paper explores modern architectures.',
+        'doi' => '10.1000/xyz123',
+        'pdf_url' => 'https://example.edu',
+        'visibility' => 'public',
+        'authors' => [
+            ['name' => 'Professor Smith', 'order' => 2],
+            ['name' => '', 'order' => 3], // Should be skipped completely
+        ],
+        'profile_bio' => 'Lab notes and extended summary.',
+        'profile_details' => ['Physics', 'Quantum', ''], // Empty details string should be stripped
+        'picture_url' => 'https://example.edu',
+    ];
+
+    $response = $this->post(route('papers.store'), $payload);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('status_paper', 'Research paper created.');
+
+    $this->assertDatabaseHas('research_papers', [
+        'title' => 'Quantum Computing Implementations',
+        'doi' => '10.1000/xyz123',
+    ]);
+
+    $paper = ResearchPaper::first();
+
+    // Verify creator is attached to pivot table with author_order 1
+    expect($paper->users->contains($this->user))->toBeTrue()
+        ->and($paper->users()->first()->pivot->author_order)->toBe(1);
+
+    // Verify both authors exist (Jane Doe automatically added as first author if not typed in payload)
+    expect($paper->authors)->toHaveCount(2);
+    $this->assertDatabaseHas('research_paper_authors', [
+        'research_paper_id' => $paper->id,
+        'name' => 'Dr. Jane Doe',
+        'author_order' => 1,
+    ]);
+    $this->assertDatabaseHas('research_paper_authors', [
+        'research_paper_id' => $paper->id,
+        'name' => 'Professor Smith',
+        'author_order' => 2,
+    ]);
+
+    // Profile asserts
+    expect($paper->profile->details)->toEqual(['Physics', 'Quantum']);
+});
