@@ -8,17 +8,16 @@ use App\Http\Requests\UpdatePaperRequest;
 use App\Models\ResearchPaper;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Tests\TestCase;
-use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
-
 
 // Pest does not set this PHPUnit subprocess bootstrap constant itself.
 if (! defined('PHPUNIT_COMPOSER_INSTALL')) {
-    define('PHPUNIT_COMPOSER_INSTALL', dirname(__DIR__, 2) . '/vendor/autoload.php');
+    define('PHPUNIT_COMPOSER_INSTALL', dirname(__DIR__, 2).'/vendor/autoload.php');
 }
 uses(RefreshDatabase::class);
 
