@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -39,6 +40,21 @@ class User extends Authenticatable // implements MustVerifyEmail
     {
 
         return $this->hasOne(Profile::class);
+    }
+
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'user_projects')
+            ->withPivot('contribution_role')
+            ->withTimestamps();
+    }
+
+    public function researchPapers(): BelongsToMany
+    {
+        return $this->belongsToMany(ResearchPaper::class, 'user_papers')
+            ->withPivot('author_order')
+            ->withTimestamps();
+
     }
 
     public function selfDeclaredRoleLabel(): ?string
