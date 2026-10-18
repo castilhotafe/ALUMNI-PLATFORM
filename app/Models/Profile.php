@@ -17,7 +17,7 @@ class Profile extends Model
         'bio',
         'details',
         'picture_url',
-        'resume_url',
+        'resume_link',
     ];
 
     protected function casts(): array

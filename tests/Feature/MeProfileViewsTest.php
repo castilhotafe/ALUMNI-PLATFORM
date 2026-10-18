@@ -224,17 +224,17 @@ it('retains stored profile and inline edit values after failed input', function 
         ->and(meProfileViewHasClass($dom, 'collapseNewPost', 'show'))->toBeTrue();
 });
 
-it('does not display the legacy resume_url field as resume_link', function () {
+it('displays a persisted resume link in the profile and edit form', function () {
     $user = meProfileViewUser();
-    $profile = $user->profile()->create(['bio' => 'Stored profile', 'resume_url' => 'https://example.test/stored-resume.pdf']);
+    $profile = $user->profile()->create(['bio' => 'Stored profile', 'resume_link' => 'https://example.test/stored-resume.pdf']);
     $user->setRelation('profile', $profile);
     $this->actingAs($user);
 
     $dom = meProfileViewDom((string) $this->view('platform.sections.profile', compact('user')));
 
-    expect($profile->resume_url)->toBe('https://example.test/stored-resume.pdf')
-        ->and($dom->query('//a[normalize-space(.)="View Resume"]')->length)->toBe(0)
-        ->and($dom->evaluate('string(//input[@name="resume_link"]/@value)'))->toBe('');
+    expect($profile->fresh()->resume_link)->toBe('https://example.test/stored-resume.pdf')
+        ->and($dom->evaluate('string(//a[normalize-space(.)="View Resume"]/@href)'))->toBe($profile->resume_link)
+        ->and($dom->evaluate('string(//input[@name="resume_link"]/@value)'))->toBe($profile->resume_link);
 });
 
 it('renders account settings and all three partials through their support components', function () {
