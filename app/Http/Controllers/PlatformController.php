@@ -179,4 +179,23 @@ class PlatformController extends Controller
             'detailOptions' => $detailOptions,
         ]);
     }
+
+    public function me(Request $request): View
+    {
+        $search = $this->searchQuery($request);
+        $user = $request->user()->load([
+            'profile',
+            'posts' => fn ($query) => $query->latest(),
+            'projects' => fn ($query) => $query->with('collaborators')->orderByDesc('projects.created_at')->take(10),
+            'researchPapers' => fn ($query) => $query->with('authors')->orderByDesc('research_papers.created_at')->take(10),
+        ]);
+
+        return view('platform.section', [
+            'section' => 'me',
+            'pageTitle' => 'Me',
+            'sectionKicker' => 'Personal hub',
+            'user' => $user,
+            'searchQuery' => $search,
+        ]);
+    }
 }
