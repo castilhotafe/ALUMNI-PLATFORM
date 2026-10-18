@@ -15,4 +15,11 @@ class PostController extends Controller
 
         return back()->with('status_post', 'Post created.');
     }
+
+    public function update(UpdatePostRequest $request, Post $post): RedirectResponse
+    {
+        $post->update($request->validated());
+
+        return back()->with('status', 'Post updated.');
+    }
 }
