@@ -22,4 +22,11 @@ class PostController extends Controller
 
         return back()->with('status', 'Post updated.');
     }
+
+    public function destroy(Post $post): RedirectResponse
+    {
+        $post->delete();
+
+        return back()->with('status', 'Post deleted.');
+    }
 }
