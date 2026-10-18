@@ -11,7 +11,7 @@ it('a user can have one profile', function () {
         'bio' => 'Test bio',
         'details' => ['location' => 'Perth'],
         'picture_url' => null,
-        'resume_url' => null,
+        'resume_link' => null,
     ]);
 
     expect($user->profile->id)->toBe($profile->id);

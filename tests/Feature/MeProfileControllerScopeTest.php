@@ -104,7 +104,7 @@ it('creates personal information only for the authenticated user from validated 
         ->and($profile->bio)->toBe('Software engineer and graduate.')
         ->and($profile->details)->toBe(['PHP', 'Research'])
         ->and($profile->picture_url)->toBe('https://example.com/avatar.png')
-        ->and($profile->resume_url)->toBeNull()
+        ->and($profile->resume_link)->toBeNull()
         ->and($otherProfile->fresh()->bio)->toBe('Keep this bio.')
         ->and($user->fresh()->name)->toBe($user->name);
 });
@@ -148,16 +148,28 @@ it('allows personal information to be explicitly cleared', function () {
         ->and($profile->fresh()->picture_url)->toBeNull();
 });
 
-it('preserves the inherited resume_link and resume_url naming mismatch', function () {
+it('persists or clears a validated resume link on the current profile', function (?string $resumeLink) {
     $user = User::factory()->create();
-    $profile = $user->profile()->create(['resume_url' => 'https://example.com/original.pdf']);
+    $profile = $user->profile()->create(['resume_link' => 'https://example.com/original.pdf']);
 
     $this->actingAs($user)->patch('/_scope/me-info', [
-        'resume_link' => 'https://example.com/replacement.pdf',
+        'resume_link' => $resumeLink,
     ])->assertSessionHasNoErrors();
 
-    // The request validates resume_link, but the existing model persists resume_url.
-    expect($profile->fresh()->resume_url)->toBe('https://example.com/original.pdf');
+    expect($profile->fresh()->resume_link)->toBe($resumeLink);
+})->with([
+    'replace an existing link' => ['https://example.com/replacement.pdf'],
+    'clear an existing link' => [null],
+]);
+
+it('persists a resume link when creating the current users first profile', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->patch('/_scope/me-info', [
+        'resume_link' => 'https://example.com/first.pdf',
+    ])->assertSessionHasNoErrors();
+
+    expect($user->fresh()->profile->resume_link)->toBe('https://example.com/first.pdf');
 });
 
 it('passes the current user to the account edit view', function () {
