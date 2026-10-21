@@ -44,6 +44,8 @@ class PaperControllerScopeTest extends TestCase
         $request = Mockery::mock($class);
         $request->shouldReceive('validated')->once()->andReturn($payload);
         $request->shouldReceive('user')->andReturn($user);
+        $request->shouldReceive('has')->andReturnUsing(fn ($key) => array_key_exists($key, $payload));
+        $request->shouldReceive('hasAny')->andReturnUsing(fn ($keys) => count(array_intersect($keys, array_keys($payload))) > 0);
 
         return $request;
     }
@@ -149,7 +151,7 @@ class PaperControllerScopeTest extends TestCase
 
         $this->assertSame('https://example.com/paper.png', $paper->fresh()->profile->picture_url);
         $this->assertSame([], $paper->fresh()->profile->details);
-        $this->assertSame($user->name, $paper->authors()->sole()->name);
+        $this->assertSame(0, $paper->authors()->count());
     }
 
     public function test_destroy_deletes_paper_and_related_records(): void
