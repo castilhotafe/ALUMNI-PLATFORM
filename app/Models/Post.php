@@ -21,4 +21,20 @@ class Post extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function scopeVisibleTo($query, $user)
+    {
+        return $query->where(function ($q) use ($user) {
+            // Condition 1: Always show public posts
+            $q->where('visibility', strtolower('public'));
+
+            // Condition 2: If the user is logged in, also show their private posts
+            if ($user) {
+                $q->orWhere(function ($innerQuery) use ($user) {
+                    $innerQuery->where('visibility', strtolower('private'))
+                        ->where('user_id', $user->id);
+                });
+            }
+        });
+    }
 }
