@@ -40,3 +40,34 @@ it('stores a newly created post for the authenticated user', function () {
         'body' => 'This is the content of the post.',
     ]);
 });
+
+/*
+|--------------------------------------------------------------------------
+| Update Method Tests
+|--------------------------------------------------------------------------
+*/
+
+it('updates the specified post with validated data', function () {
+    $post = Post::factory()->create([
+        'user_id' => $this->user->id,
+        'title' => 'Old Post Title',
+        'body' => 'Old post content string.',
+        'visibility' => 'private',
+    ]);
+
+    $updatePayload = [
+        'title' => 'Completely New Post Title',
+        'content' => 'Updated post content string.',
+        'visibility' => 'public', // Added required validation field
+        'body' => 'Updated post content string.', // Added 'body' field to match Post model
+    ];
+
+    $response = $this->patch(route('posts.update', $post), $updatePayload);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('status', 'Post updated.');
+
+    expect($post->fresh())
+        ->title->toBe('Completely New Post Title')
+        ->visibility->toBe('public');
+});
