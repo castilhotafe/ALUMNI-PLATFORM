@@ -60,40 +60,51 @@ class ProjectController extends Controller
         $projectData = Arr::only($validated, ['title', 'description', 'repo_url', 'visibility']);
         $project->update($projectData);
 
-        $collaborators = collect($validated['collaborators'] ?? [])
-            ->filter(fn ($collaborator) => filled($collaborator['name'] ?? null))
-            ->map(fn ($collaborator) => [
-                'name' => $collaborator['name'],
-                'role' => $collaborator['role'] ?? null,
-            ]);
+        if ($request->has('collaborators')) {
+            $collaborators = collect($validated['collaborators'] ?? [])
+                ->filter(fn ($collaborator) => filled($collaborator['name'] ?? null))
+                ->map(fn ($collaborator) => [
+                    'name' => $collaborator['name'],
+                    'role' => $collaborator['role'] ?? null,
+                ]);
 
-        $ownerName = $request->user()->name;
-        if (! $collaborators->contains(fn ($collaborator) => strcasecmp($collaborator['name'], $ownerName) === 0)) {
-            $collaborators->push([
-                'name' => $ownerName,
-                'role' => 'Owner',
-            ]);
+            $ownerName = $request->user()->name;
+            if (! $collaborators->contains(fn ($collaborator) => strcasecmp($collaborator['name'], $ownerName) === 0)) {
+                $collaborators->push([
+                    'name' => $ownerName,
+                    'role' => 'Owner',
+                ]);
+            }
+
+            $project->collaborators()->delete();
+            if ($collaborators->isNotEmpty()) {
+                $project->collaborators()->createMany($collaborators->values()->all());
+            }
         }
 
-        $project->collaborators()->delete();
+        if ($request->hasAny(['profile_bio', 'picture_url', 'profile_details'])) {
+            $profileData = [
+                'bio' => $request->has('profile_bio')
+                    ? ($validated['profile_bio'] ?? null)
+                    : $project->profile?->bio,
 
-        if ($collaborators->isNotEmpty()) {
-            $project->collaborators()->createMany($collaborators->values()->all());
-        }
+                'picture_url' => $request->has('picture_url')
+                    ? ($validated['picture_url'] ?? null)
+                    : $project->profile?->picture_url,
 
-        $profileData = [
-            'bio' => $validated['profile_bio'] ?? null,
-            'details' => collect($validated['profile_details'] ?? [])
-                ->filter(fn ($detail) => filled($detail))
-                ->values()
-                ->all(),
-            'picture_url' => $validated['picture_url'] ?? null,
-        ];
+                'details' => $request->has('profile_details')
+                    ? collect($validated['profile_details'] ?? [])
+                        ->filter(fn ($detail) => filled($detail))
+                        ->values()
+                        ->all()
+                    : ($project->profile?->details ?? []),
+            ];
 
-        if ($project->profile) {
-            $project->profile->update($profileData);
-        } elseif (filled($profileData['bio']) || filled($profileData['picture_url']) || ! empty($profileData['details'])) {
-            $project->profile()->create($profileData);
+            if ($project->profile) {
+                $project->profile->update($profileData);
+            } elseif (filled($profileData['bio']) || filled($profileData['picture_url']) || ! empty($profileData['details'])) {
+                $project->profile()->create($profileData);
+            }
         }
 
         return back()->with('status', 'Project updated.');
