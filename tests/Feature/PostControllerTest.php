@@ -71,3 +71,27 @@ it('updates the specified post with validated data', function () {
         ->title->toBe('Completely New Post Title')
         ->visibility->toBe('public');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Destroy Method Tests
+|--------------------------------------------------------------------------
+*/
+
+it('deletes the specified post successfully', function () {
+    $post = Post::factory()->create([
+        'user_id' => $this->user->id,
+        'title' => 'Post to Delete',
+        'body' => 'Content of the post to delete.',
+        'visibility' => 'public',
+    ]);
+
+    $response = $this->delete(route('posts.destroy', $post));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('status', 'Post deleted.');
+
+    $this->assertDatabaseMissing('posts', [
+        'id' => $post->id,
+    ]);
+});
