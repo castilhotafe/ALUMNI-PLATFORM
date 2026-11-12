@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
-class UsersAndProfilesSeeder extends Seeder
+class UserAndProfilesSeeder extends Seeder
 {
     public const USER_COUNT = 60;
 

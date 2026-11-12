@@ -61,7 +61,11 @@ class User extends Authenticatable // implements MustVerifyEmail
         return $this->belongsToMany(ResearchPaper::class, 'user_papers')
             ->withPivot('author_order')
             ->withTimestamps();
+    }
 
+    public function groups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class, 'group_members')->withPivot('member_role')->withTimestamps();
     }
 
     public function selfDeclaredRoleLabel(): ?string
