@@ -1,14 +1,18 @@
 <?php
 
+use App\Models\EnrolmentListing;
 use App\Models\Group;
+use App\Models\JobListing;
 use App\Models\Project;
 use App\Models\ResearchPaper;
 use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 uses(RefreshDatabase::class);
 
@@ -17,9 +21,24 @@ beforeEach(function () {
     foreach (['Current Student', 'Alumni', 'Lecturer', 'Partner', 'General User', 'Admin'] as $roleName) {
         Role::findOrCreate($roleName);
     }
-    $this->user = User::factory()->create(['name' => 'John Doe']);
-    $this->actingAs($this->user);
+    Permission::findOrCreate('create job listings');
+    Permission::findOrCreate('create enrolment listings');
+
     $this->withoutMiddleware(PreventRequestForgery::class);
+});
+
+describe('PlatformController Access Guardrails', function () {
+
+    it('redirects unauthenticated guests to the login page for all platform sections', function (string $route) {
+        get($route)->assertRedirect(route('login'));
+    })->with([
+        '/projects',
+        '/papers',
+        '/me',
+        '/directory',
+        '/networking-hub',
+        '/discover-hub',
+    ]);
 });
 
 describe('Projects Section (PlatformController@projects)', function () {
@@ -229,5 +248,108 @@ describe('Networking Hub Section (PlatformController@networking)', function () {
             ->assertViewHas('groups', function ($groups) use ($matchedGroup, $unmatchedGroup) {
                 return $groups->contains($matchedGroup) && ! $groups->contains($unmatchedGroup);
             });
+    });
+});
+
+describe('Discover Hub Section (PlatformController@discover)', function () {
+
+    it('renders the discover hub with paginated job listings and enrolment listings for authenticated users', function () {
+        $user = User::factory()->create();
+        $user->assignRole('Alumni');
+
+        $jobListing = JobListing::factory()->create(['title' => 'Senior Backend Engineer']);
+        $enrolmentListing = EnrolmentListing::factory()->create(['course_title' => 'Diploma of IT']);
+
+        actingAs($user)
+            ->get(route('discover'))
+            ->assertOk()
+            ->assertViewIs('platform.section')
+            ->assertViewHasAll([
+                'section' => 'discover',
+                'pageTitle' => 'Discover Hub',
+                'sectionKicker' => 'Opportunities',
+            ])
+            ->assertViewHas('jobListings', fn($jobs) => $jobs->getCollection()->contains($jobListing))
+            ->assertViewHas('enrolmentListings', fn($enrolments) => $enrolments->getCollection()->contains($enrolmentListing));
+    });
+
+    it('populates manageable listings filtered by creator for listing managers', function () {
+        $partnerUser = User::factory()->create([
+            'isPartner' => true,
+            'isVerifiedPartner' => true,
+        ]);
+        $partnerUser->givePermissionTo('create job listings');
+        $partnerUser->givePermissionTo('create enrolment listings');
+
+        $otherUser = User::factory()->create();
+
+        $ownJob = JobListing::factory()->create([
+            'creator_user_id' => $partnerUser->id,
+            'title' => 'Own Company Job',
+        ]);
+        $otherJob = JobListing::factory()->create([
+            'creator_user_id' => $otherUser->id,
+            'title' => 'Other Company Job',
+        ]);
+
+        $ownEnrolment = EnrolmentListing::factory()->create([
+            'creator_user_id' => $partnerUser->id,
+            'course_title' => 'Own Course',
+        ]);
+        $otherEnrolment = EnrolmentListing::factory()->create([
+            'creator_user_id' => $otherUser->id,
+            'course_title' => 'Other Course',
+        ]);
+
+        actingAs($partnerUser)
+            ->get(route('discover'))
+            ->assertOk()
+            ->assertViewHas('canPostListings', true)
+            ->assertViewHas('manageableJobListings', function ($jobs) use ($ownJob, $otherJob) {
+                return $jobs->contains($ownJob) && ! $jobs->contains($otherJob);
+            })
+            ->assertViewHas('manageableEnrolmentListings', function ($enrolments) use ($ownEnrolment, $otherEnrolment) {
+                return $enrolments->contains($ownEnrolment) && ! $enrolments->contains($otherEnrolment);
+            });
+    });
+
+    it('allows Admin users to see all listings in manageable collections', function () {
+        $admin = User::factory()->create();
+        $admin->assignRole('Admin');
+        $admin->givePermissionTo('create job listings');
+        $admin->givePermissionTo('create enrolment listings');
+
+        $job1 = JobListing::factory()->create();
+        $job2 = JobListing::factory()->create();
+
+        actingAs($admin)
+            ->get(route('discover'))
+            ->assertOk()
+            ->assertViewHas('canPostListings', true)
+            ->assertViewHas('manageableJobListings', function ($jobs) use ($job1, $job2) {
+                return $jobs->contains($job1) && $jobs->contains($job2);
+            });
+    });
+
+    it('filters discover listings by search query and detail options', function () {
+        $user = User::factory()->create();
+        $user->assignRole('Alumni');
+
+        $matchedJob = JobListing::factory()->create(['title' => 'Cloud Architect']);
+        $matchedJob->profile()->create([
+            'bio' => 'AWS infrastructure role',
+            'details' => ['DevOps', 'AWS'],
+        ]);
+
+        $unmatchedJob = JobListing::factory()->create(['title' => 'Frontend Developer']);
+
+        actingAs($user)
+            ->get(route('discover', ['q' => 'Cloud', 'details' => ['DevOps']]))
+            ->assertOk()
+            ->assertViewHas('jobListings', function ($jobs) use ($matchedJob, $unmatchedJob) {
+                return $jobs->getCollection()->contains($matchedJob)
+                    && ! $jobs->getCollection()->contains($unmatchedJob);
+            })
+            ->assertViewHas('detailOptions', fn($options) => in_array('DevOps', $options, true));
     });
 });
