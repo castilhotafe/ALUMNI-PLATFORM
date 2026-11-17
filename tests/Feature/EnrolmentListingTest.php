@@ -5,6 +5,7 @@ use App\Models\EnrolmentListingProfile;
 use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -253,7 +254,7 @@ describe('Enrolment Listing Update Action', function () {
             'creator_user_id' => $creatorWithoutPermission->id,
         ]);
 
-        expect(\Illuminate\Support\Facades\Gate::forUser($creatorWithoutPermission)->denies('update', $enrolmentListing))
+        expect(Gate::forUser($creatorWithoutPermission)->denies('update', $enrolmentListing))
             ->toBeTrue();
     });
 });

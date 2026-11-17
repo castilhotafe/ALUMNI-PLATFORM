@@ -29,6 +29,7 @@ class LoginRequest extends FormRequest
             'password' => ['required', 'string'],
         ];
     }
+
     public function authenticate(): void
     {
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {

@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\ContributionTriggered;
 use App\Models\Contribution;
 use App\Models\Project;
 use App\Models\User;
@@ -100,7 +101,7 @@ describe('HasContributions Trait Methods & Accessors', function () {
     it('throws an InvalidArgumentException when adding a zero-point contribution', function () {
         $user = User::factory()->create();
 
-        expect(fn() => $user->addContribution(0, 'Zero points test'))
+        expect(fn () => $user->addContribution(0, 'Zero points test'))
             ->toThrow(InvalidArgumentException::class, 'Contribution amount must not be zero.');
     });
 
@@ -180,7 +181,7 @@ describe('RecordContribution Listener', function () {
         config()->set('contributions.events', []);
         $user = User::factory()->create();
 
-        \App\Events\ContributionTriggered::dispatch($user, 'unregistered_event_key');
+        ContributionTriggered::dispatch($user, 'unregistered_event_key');
 
         expect($user->contributions()->count())->toBe(0);
     });
@@ -192,7 +193,7 @@ describe('RecordContribution Listener', function () {
         ]);
         $user = User::factory()->create();
 
-        \App\Events\ContributionTriggered::dispatch($user, 'zero_point_event');
+        ContributionTriggered::dispatch($user, 'zero_point_event');
 
         expect($user->contributions()->count())->toBe(0);
     });
@@ -204,7 +205,7 @@ describe('RecordContribution Listener', function () {
         ]);
         $user = User::factory()->create();
 
-        \App\Events\ContributionTriggered::dispatch($user, 'penalty_event');
+        ContributionTriggered::dispatch($user, 'penalty_event');
 
         $this->assertDatabaseHas('contributions', [
             'user_id' => $user->id,
@@ -220,7 +221,7 @@ describe('RecordContribution Listener', function () {
         $user = User::factory()->create();
         $project = Project::factory()->create();
 
-        \App\Events\ContributionTriggered::dispatch($user, 'custom_milestone_reached', $project);
+        ContributionTriggered::dispatch($user, 'custom_milestone_reached', $project);
 
         $this->assertDatabaseHas('contributions', [
             'user_id' => $user->id,

@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\PlatformController;
 use App\Models\EnrolmentListing;
 use App\Models\Group;
 use App\Models\JobListing;
+use App\Models\Post;
 use App\Models\Project;
 use App\Models\ResearchPaper;
 use App\Models\User;
@@ -59,7 +61,7 @@ describe('Projects Section (PlatformController@projects)', function () {
                 'pageTitle' => 'Projects',
                 'sectionKicker' => 'Collaboration',
             ])
-            ->assertViewHas('projects', fn($projects) => $projects->contains($project));
+            ->assertViewHas('projects', fn ($projects) => $projects->contains($project));
     });
 
     it('filters projects by search query and selected profile details', function () {
@@ -88,7 +90,7 @@ describe('Projects Section (PlatformController@projects)', function () {
             ->assertViewHas('projects', function ($projects) use ($matchedProject, $unmatchedProject) {
                 return $projects->contains($matchedProject) && ! $projects->contains($unmatchedProject);
             })
-            ->assertViewHas('detailOptions', fn($options) => in_array('PHP', $options, true));
+            ->assertViewHas('detailOptions', fn ($options) => in_array('PHP', $options, true));
     });
 
     it('filters user-owned projects and excludes items missing required detail tags', function () {
@@ -135,7 +137,7 @@ describe('Research Papers Section (PlatformController@papers)', function () {
                 'pageTitle' => 'Research Papers',
                 'sectionKicker' => 'Knowledge sharing',
             ])
-            ->assertViewHas('papers', fn($papers) => $papers->contains($paper));
+            ->assertViewHas('papers', fn ($papers) => $papers->contains($paper));
     });
 
     it('filters research papers by keyword search query and profile details', function () {
@@ -180,7 +182,7 @@ describe('Research Papers Section (PlatformController@papers)', function () {
         actingAs($user)
             ->get(route('papers', ['q' => 'Distributed', 'details' => ['Cloud']]))
             ->assertOk()
-            ->assertViewHas('userPapers', fn($papers) => $papers->contains($authoredPaper));
+            ->assertViewHas('userPapers', fn ($papers) => $papers->contains($authoredPaper));
     });
 });
 
@@ -199,7 +201,7 @@ describe('Personal Workspace Section (PlatformController@me)', function () {
                 'pageTitle' => 'Me',
                 'sectionKicker' => 'Personal hub',
             ])
-            ->assertViewHas('user', fn($viewUser) => $viewUser->id === $user->id);
+            ->assertViewHas('user', fn ($viewUser) => $viewUser->id === $user->id);
     });
 });
 
@@ -221,7 +223,7 @@ describe('Developer Directory Section (PlatformController@directory)', function 
                 'pageTitle' => 'Developer Directory',
                 'sectionKicker' => 'Find alumni',
             ])
-            ->assertViewHas('users', fn($users) => $users->contains($currentUser) && $users->contains($otherUser));
+            ->assertViewHas('users', fn ($users) => $users->contains($currentUser) && $users->contains($otherUser));
     });
 
     it('filters directory members by search query and skill detail options', function () {
@@ -266,8 +268,8 @@ describe('Networking Hub Section (PlatformController@networking)', function () {
                 'pageTitle' => 'Networking Hub',
                 'sectionKicker' => 'Communities',
             ])
-            ->assertViewHas('groups', fn($groups) => $groups->contains($group))
-            ->assertViewHas('memberGroups', fn($memberGroups) => $memberGroups->contains($group));
+            ->assertViewHas('groups', fn ($groups) => $groups->contains($group))
+            ->assertViewHas('memberGroups', fn ($memberGroups) => $memberGroups->contains($group));
     });
 
     it('filters networking groups by title, description, or attached member names', function () {
@@ -313,8 +315,8 @@ describe('Discover Hub Section (PlatformController@discover)', function () {
                 'pageTitle' => 'Discover Hub',
                 'sectionKicker' => 'Opportunities',
             ])
-            ->assertViewHas('jobListings', fn($jobs) => $jobs->getCollection()->contains($jobListing))
-            ->assertViewHas('enrolmentListings', fn($enrolments) => $enrolments->getCollection()->contains($enrolmentListing));
+            ->assertViewHas('jobListings', fn ($jobs) => $jobs->getCollection()->contains($jobListing))
+            ->assertViewHas('enrolmentListings', fn ($enrolments) => $enrolments->getCollection()->contains($enrolmentListing));
     });
 
     it('populates manageable listings filtered by creator for listing managers', function () {
@@ -394,7 +396,7 @@ describe('Discover Hub Section (PlatformController@discover)', function () {
                 return $jobs->getCollection()->contains($matchedJob)
                     && ! $jobs->getCollection()->contains($unmatchedJob);
             })
-            ->assertViewHas('detailOptions', fn($options) => in_array('DevOps', $options, true));
+            ->assertViewHas('detailOptions', fn ($options) => in_array('DevOps', $options, true));
     });
     it('denies posting privileges to unverified partners and unverified lecturers', function () {
         $unverifiedPartner = User::factory()->create([
@@ -407,7 +409,7 @@ describe('Discover Hub Section (PlatformController@discover)', function () {
             ->get(route('discover'))
             ->assertOk()
             ->assertViewHas('canPostListings', false)
-            ->assertViewHas('manageableJobListings', fn($jobs) => $jobs->isEmpty());
+            ->assertViewHas('manageableJobListings', fn ($jobs) => $jobs->isEmpty());
 
         $unverifiedLecturer = User::factory()->create([
             'isLecturer' => true,
@@ -419,11 +421,11 @@ describe('Discover Hub Section (PlatformController@discover)', function () {
             ->get(route('discover'))
             ->assertOk()
             ->assertViewHas('canPostListings', false)
-            ->assertViewHas('manageableEnrolmentListings', fn($enrolments) => $enrolments->isEmpty());
+            ->assertViewHas('manageableEnrolmentListings', fn ($enrolments) => $enrolments->isEmpty());
     });
 
     it('returns false from canPostListings when no user is authenticated', function () {
-        $controller = new \App\Http\Controllers\PlatformController();
+        $controller = new PlatformController;
         $method = new ReflectionMethod($controller, 'canPostListings');
 
         expect($method->invoke($controller))->toBeFalse();
@@ -436,7 +438,7 @@ describe('Dashboard Section (PlatformController@dashboard)', function () {
         $user = User::factory()->create(['isAlumni' => true]);
         $user->assignRole('Alumni');
 
-        $post = \App\Models\Post::factory()->create(['user_id' => $user->id]);
+        $post = Post::factory()->create(['user_id' => $user->id]);
         $project = Project::factory()->create(['visibility' => 'public']);
         $paper = ResearchPaper::factory()->create(['visibility' => 'public']);
         $group = Group::factory()->create(['creator_user_id' => $user->id]);
@@ -452,9 +454,9 @@ describe('Dashboard Section (PlatformController@dashboard)', function () {
                 'pageTitle' => 'Dashboard',
                 'sectionKicker' => 'Overview',
             ])
-            ->assertViewHas('metrics', fn($metrics) => count($metrics) === 12)
-            ->assertViewHas('recentContent', fn($items) => $items->pluck('item.id')->contains($post->id))
-            ->assertViewHas('networkPulse', function ($items) use ($project, $paper, $group, $job, $enrolment) {
+            ->assertViewHas('metrics', fn ($metrics) => count($metrics) === 12)
+            ->assertViewHas('recentContent', fn ($items) => $items->pluck('item.id')->contains($post->id))
+            ->assertViewHas('networkPulse', function ($items) {
                 $types = $items->pluck('type')->all();
 
                 return in_array('project', $types, true)
@@ -463,16 +465,16 @@ describe('Dashboard Section (PlatformController@dashboard)', function () {
                     && in_array('job', $types, true)
                     && in_array('enrolment', $types, true);
             })
-            ->assertViewHas('topProfiles', fn($profiles) => $profiles->contains($user));
+            ->assertViewHas('topProfiles', fn ($profiles) => $profiles->contains($user));
     });
 
     it('paginates dashboard content, network pulse, and member collections across multiple pages', function () {
         $user = User::factory()->create();
         $user->assignRole('Alumni');
 
-        \App\Models\Post::factory()->count(7)->create(['user_id' => $user->id]);
+        Post::factory()->count(7)->create(['user_id' => $user->id]);
         Project::factory()->count(7)->create(['visibility' => 'public']);
-        User::factory()->count(7)->create()->each(fn($member) => $member->assignRole('Current Student'));
+        User::factory()->count(7)->create()->each(fn ($member) => $member->assignRole('Current Student'));
 
         actingAs($user)
             ->get(route('dashboard', [
@@ -481,8 +483,8 @@ describe('Dashboard Section (PlatformController@dashboard)', function () {
                 'members_page' => 2,
             ]))
             ->assertOk()
-            ->assertViewHas('recentContentPagination', fn($pagination) => $pagination['current_page'] === 2 && $pagination['total_pages'] === 2)
-            ->assertViewHas('networkPulsePagination', fn($pagination) => $pagination['current_page'] === 2 && $pagination['total_pages'] === 2)
-            ->assertViewHas('membersPagination', fn($pagination) => $pagination['current_page'] === 2 && $pagination['total_pages'] === 2);
+            ->assertViewHas('recentContentPagination', fn ($pagination) => $pagination['current_page'] === 2 && $pagination['total_pages'] === 2)
+            ->assertViewHas('networkPulsePagination', fn ($pagination) => $pagination['current_page'] === 2 && $pagination['total_pages'] === 2)
+            ->assertViewHas('membersPagination', fn ($pagination) => $pagination['current_page'] === 2 && $pagination['total_pages'] === 2);
     });
 });

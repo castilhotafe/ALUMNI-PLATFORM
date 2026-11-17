@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Group;
 use App\Models\Post;
 use App\Models\Profile;
 use App\Models\Project;
@@ -78,7 +79,7 @@ describe('User Model Relationships', function () {
 
     it('belongs to many groups with member_role pivot data', function () {
         $user = User::factory()->create();
-        $group = \App\Models\Group::factory()->create();
+        $group = Group::factory()->create();
 
         $user->groups()->attach($group->id, ['member_role' => 'owner']);
 

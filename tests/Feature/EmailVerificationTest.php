@@ -37,7 +37,7 @@ describe('Email Verification Logic', function () {
 
         Event::assertDispatched(Verified::class);
         expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
-        $response->assertRedirect(route('dashboard', absolute: false) . '?verified=1');
+        $response->assertRedirect(route('dashboard', absolute: false).'?verified=1');
     });
 
     test('email is not verified with invalid hash', function () {
@@ -108,6 +108,6 @@ describe('Email Verification Logic', function () {
         $response = $this->actingAs($user)->get($verificationUrl);
 
         Event::assertNotDispatched(Verified::class);
-        $response->assertRedirect(route('dashboard', absolute: false) . '?verified=1');
+        $response->assertRedirect(route('dashboard', absolute: false).'?verified=1');
     });
 });

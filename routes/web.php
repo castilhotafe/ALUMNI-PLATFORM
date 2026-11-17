@@ -75,7 +75,6 @@ Route::middleware('auth')->group(function () {
         ->name('logout');
 });
 
-
 // Authenticated and Verified Routes (Only for logged-in users with verified email)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [PlatformController::class, 'dashboard'])->name('dashboard');

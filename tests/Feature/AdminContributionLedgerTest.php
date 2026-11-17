@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Contribution;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -49,8 +48,8 @@ describe('Admin Contribution Ledger (ContributionController)', function (): void
                 'penalties' => -15,
                 'entries' => 2,
             ])
-            ->assertViewHas('contributions', fn($contributions) => $contributions->total() === 2)
-            ->assertViewHas('users', fn($users) => $users->contains('id', $recipient->id));
+            ->assertViewHas('contributions', fn ($contributions) => $contributions->total() === 2)
+            ->assertViewHas('users', fn ($users) => $users->contains('id', $recipient->id));
     });
 
     it('grants contribution points to a user without a reference model', function (): void {
