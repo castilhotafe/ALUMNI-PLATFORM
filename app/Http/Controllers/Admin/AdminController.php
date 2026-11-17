@@ -303,15 +303,6 @@ class AdminController extends Controller
         ];
     }
 
-    private function editableRoleSelectionMap(): array
-    {
-        $roleMap = $this->roleSelectionMap();
-
-        unset($roleMap['admin']);
-
-        return $roleMap;
-    }
-
     private function resolveRolePayload(string $selection): array
     {
         $roleMap = $this->roleSelectionMap();
