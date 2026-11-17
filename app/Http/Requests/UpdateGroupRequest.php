@@ -12,11 +12,10 @@ class UpdateGroupRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Fetch the active group instance from the route parameters
         $group = $this->route('group');
 
-        // Verify the user is linked to the group. Returns a 403 error automatically if false.
-        return $group && $group->users()->whereKey($this->user()->id)->exists();
+        // Check if the group exists and the current user is the creator
+        return $group && (int) $group->creator_user_id === (int) $this->user()?->id;
     }
 
     /**

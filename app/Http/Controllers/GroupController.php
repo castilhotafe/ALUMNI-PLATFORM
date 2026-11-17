@@ -68,8 +68,6 @@ class GroupController extends Controller
 
     public function update(UpdateGroupRequest $request, Group $group): RedirectResponse
     {
-        abort_unless($group->creator_user_id === $request->user()->id, 403);
-
         $validated = $request->validated();
 
         $groupData = Arr::only($validated, ['name', 'description']);
