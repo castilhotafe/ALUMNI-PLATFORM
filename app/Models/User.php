@@ -61,6 +61,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Group::class, 'group_members')->withPivot('member_role')->withTimestamps();
     }
 
+    public function jobListings(): HasMany
+    {
+        return $this->hasMany(JobListing::class, 'creator_user_id');
+    }
+
+    public function enrolmentListings(): HasMany
+    {
+        return $this->hasMany(EnrolmentListing::class, 'creator_user_id');
+    }
+
     public function selfDeclaredRoleLabel(): ?string
     {
         if ($this->isCurrent) {

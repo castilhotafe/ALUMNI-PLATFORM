@@ -14,6 +14,8 @@ class RolePermissionSeeder extends Seeder
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $permissions = [
+            'create job listings',
+            'create enrolment listings',
             'access admin dashboard',
         ];
 
@@ -34,11 +36,19 @@ class RolePermissionSeeder extends Seeder
             Role::findOrCreate($role);
         }
 
-        Role::findByName('Lecturer')->givePermissionTo([]);
+        Role::findByName('Lecturer')->givePermissionTo([
+            'create job listings',
+            'create enrolment listings',
+        ]);
 
-        Role::findByName('Partner')->givePermissionTo([]);
+        Role::findByName('Partner')->givePermissionTo([
+            'create job listings',
+            'create enrolment listings',
+        ]);
 
         Role::findByName('Admin')->givePermissionTo([
+            'create job listings',
+            'create enrolment listings',
             'access admin dashboard',
         ]);
     }
