@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\ContributionTriggered;
+// use App\Events\ContributionTriggered;
 use App\Http\Requests\StoreJobListingRequest;
 use App\Http\Requests\UpdateJobListingRequest;
 use App\Models\JobListing;
@@ -18,7 +18,7 @@ class JobListingController extends Controller
         return [
             'bio' => $validated["{$prefix}_profile_bio"] ?? null,
             'details' => collect($validated["{$prefix}_profile_details"] ?? [])
-                ->filter(fn ($detail) => filled($detail))
+                ->filter(fn($detail) => filled($detail))
                 ->values()
                 ->all(),
             'picture_url' => $validated["{$prefix}_picture_url"] ?? null,
@@ -76,7 +76,7 @@ class JobListingController extends Controller
 
     public function trackJobApplication(Request $request, JobListing $jobListing): RedirectResponse
     {
-        ContributionTriggered::dispatch($request->user(), 'job_application_clicked', $jobListing);
+        // ContributionTriggered::dispatch($request->user(), 'job_application_clicked', $jobListing);
         $destination = $jobListing->apply_link ?: route('discover');
 
         return redirect()->away($destination);
