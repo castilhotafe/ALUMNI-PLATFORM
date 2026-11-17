@@ -31,7 +31,7 @@ class StoreUserRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'role_selection' => ['required', 'string', Rule::in(['current', 'alumni', 'lecturer', 'partner', 'general'])],
             'status' => ['required', 'string', Rule::in(['active', 'pending'])],
             'student_id' => [

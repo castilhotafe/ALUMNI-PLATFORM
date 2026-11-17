@@ -80,6 +80,6 @@ class ContributionController extends Controller
 
         return redirect()
             ->route('admin.contributions.index')
-            ->with('status', 'Contribution ledger updated for ' . $targetUser->name . '.');
+            ->with('status', 'Contribution ledger updated for '.$targetUser->name.'.');
     }
 }

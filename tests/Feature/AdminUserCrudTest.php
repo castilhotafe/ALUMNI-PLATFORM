@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
-use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 
 uses(RefreshDatabase::class);
 

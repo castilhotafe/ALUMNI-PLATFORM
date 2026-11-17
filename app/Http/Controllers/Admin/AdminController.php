@@ -18,7 +18,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Role;
 
@@ -91,7 +90,7 @@ class AdminController extends Controller
 
         $totalUsers = $users->count();
         $roleCounts = $users
-            ->map(fn($user) => $this->effectiveRoleKey($user, $roleMap))
+            ->map(fn ($user) => $this->effectiveRoleKey($user, $roleMap))
             ->countBy();
 
         $adminCount = (int) ($roleCounts->get('admin') ?? 0);
@@ -102,21 +101,19 @@ class AdminController extends Controller
         $generalCount = (int) ($roleCounts->get('general') ?? 0);
 
         $activeUsers = $users->filter(
-            fn($user) =>
-            $user->email_verified_at !== null && (! $user->isPartner || $user->isVerifiedPartner) && (! $user->isLecturer || $user->isVerifiedLecturer)
+            fn ($user) => $user->email_verified_at !== null && (! $user->isPartner || $user->isVerifiedPartner) && (! $user->isLecturer || $user->isVerifiedLecturer)
         )->count();
 
         $pendingUsers = $users->filter(
-            fn($user) =>
-            $user->email_verified_at === null || ($user->isPartner && ! $user->isVerifiedPartner) || ($user->isLecturer && ! $user->isVerifiedLecturer)
+            fn ($user) => $user->email_verified_at === null || ($user->isPartner && ! $user->isVerifiedPartner) || ($user->isLecturer && ! $user->isVerifiedLecturer)
         )->count();
 
-        $emailVerifiedUsers = $users->filter(fn($user) => $user->email_verified_at !== null)->count();
+        $emailVerifiedUsers = $users->filter(fn ($user) => $user->email_verified_at !== null)->count();
         $verifiedPartnerCount = $users
-            ->filter(fn($user) => $this->effectiveRoleKey($user, $roleMap) === 'partner' && $user->isVerifiedPartner)
+            ->filter(fn ($user) => $this->effectiveRoleKey($user, $roleMap) === 'partner' && $user->isVerifiedPartner)
             ->count();
         $verifiedLecturerCount = $users
-            ->filter(fn($user) => $this->effectiveRoleKey($user, $roleMap) === 'lecturer' && $user->isVerifiedLecturer)
+            ->filter(fn ($user) => $this->effectiveRoleKey($user, $roleMap) === 'lecturer' && $user->isVerifiedLecturer)
             ->count();
 
         $totalProjects = Project::count();
@@ -217,7 +214,7 @@ class AdminController extends Controller
 
         $user->save();
 
-        return back()->with('status', 'Verification updated for ' . $user->name . '.');
+        return back()->with('status', 'Verification updated for '.$user->name.'.');
     }
 
     public function storeUser(StoreUserRequest $request): RedirectResponse
@@ -291,7 +288,7 @@ class AdminController extends Controller
         $userName = $user->name;
         $user->delete();
 
-        return back()->with('status', 'User deleted: ' . $userName . '.');
+        return back()->with('status', 'User deleted: '.$userName.'.');
     }
 
     private function roleSelectionMap(): array
@@ -340,7 +337,7 @@ class AdminController extends Controller
             return '0.0%';
         }
 
-        return number_format(($numerator / $denominator) * 100, 1) . '%';
+        return number_format(($numerator / $denominator) * 100, 1).'%';
     }
 
     private function formatAverage(int $numerator, int $denominator): string
