@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\ViewErrorBag;
+use Spatie\Permission\Traits\HasRoles;
 
 // These are Blade rendering tests, not endpoint or browser interaction tests.
 // Profile routes belong to a separate issue; PostController is tracked separately.
@@ -34,7 +35,7 @@ beforeEach(function () {
     ) {
         if (! Route::has($name)) {
             // Only URL generation is needed. Never serve production behavior here.
-            Route::match([$method], $uri, fn() => abort(501))->name($name);
+            Route::match([$method], $uri, fn () => abort(501))->name($name);
         }
     }
 
@@ -58,7 +59,7 @@ function meProfileViewDom(string $html): DOMXPath
 {
     $previous = libxml_use_internal_errors(true);
     $document = new DOMDocument;
-    $document->loadHTML('<?xml encoding="UTF-8">' . $html);
+    $document->loadHTML('<?xml encoding="UTF-8">'.$html);
     libxml_clear_errors();
     libxml_use_internal_errors($previous);
 
@@ -67,7 +68,7 @@ function meProfileViewDom(string $html): DOMXPath
 
 function meProfileViewHasClass(DOMXPath $dom, string $id, string $class): bool
 {
-    return $dom->query('//*[@id="' . $id . '" and contains(concat(" ", normalize-space(@class), " "), " ' . $class . ' ")]')->length === 1;
+    return $dom->query('//*[@id="'.$id.'" and contains(concat(" ", normalize-space(@class), " "), " '.$class.' ")]')->length === 1;
 }
 
 it('renders the complete Me view with empty profile and contribution states', function () {
@@ -94,9 +95,9 @@ it('renders the complete Me view with empty profile and contribution states', fu
         ->and($dom->evaluate('string(//*[@id="profileEditForm"]//input[@name="_method"]/@value)'))->toBe('PATCH');
 
     foreach (['Post' => 'posts.store', 'Project' => 'projects.store', 'Paper' => 'papers.store'] as $panel => $route) {
-        expect(meProfileViewHasClass($dom, 'collapseNew' . $panel, 'show'))->toBeFalse()
-            ->and($dom->evaluate('string(//*[@id="collapseNew' . $panel . '"]//form/@action)'))->toBe(route($route))
-            ->and($dom->query('//*[@id="collapseNew' . $panel . '"]//input[@name="_token"]')->length)->toBe(1);
+        expect(meProfileViewHasClass($dom, 'collapseNew'.$panel, 'show'))->toBeFalse()
+            ->and($dom->evaluate('string(//*[@id="collapseNew'.$panel.'"]//form/@action)'))->toBe(route($route))
+            ->and($dom->query('//*[@id="collapseNew'.$panel.'"]//input[@name="_token"]')->length)->toBe(1);
     }
 });
 
@@ -145,40 +146,40 @@ it('renders supplied profile details and escaped contribution records with edit 
         ->and($dom->evaluate('normalize-space(//main)'))->toContain('Author order: 2');
 
     foreach ([['Post', 'posts', $post], ['Project', 'projects', $project], ['Paper', 'papers', $paper]] as [$panel, $resource, $record]) {
-        $form = '//*[@id="collapseEdit' . $panel . $record->id . '"]//form';
-        expect($dom->evaluate('string(' . $form . '/@action)'))->toBe(route($resource . '.update', $record))
-            ->and($dom->evaluate('string(' . $form . '//input[@name="_method"]/@value)'))->toBe('PATCH')
-            ->and($dom->evaluate('string(' . $form . '//input[@name="title"]/@value)'))->toBe($record->title)
-            ->and($dom->query($form . '//option[@value="private" and @selected]')->length)->toBe(1)
-            ->and($dom->query('//form[@action="' . route($resource . '.destroy', $record) . '"]//input[@name="_method" and @value="DELETE"]')->length)->toBe(1);
+        $form = '//*[@id="collapseEdit'.$panel.$record->id.'"]//form';
+        expect($dom->evaluate('string('.$form.'/@action)'))->toBe(route($resource.'.update', $record))
+            ->and($dom->evaluate('string('.$form.'//input[@name="_method"]/@value)'))->toBe('PATCH')
+            ->and($dom->evaluate('string('.$form.'//input[@name="title"]/@value)'))->toBe($record->title)
+            ->and($dom->query($form.'//option[@value="private" and @selected]')->length)->toBe(1)
+            ->and($dom->query('//form[@action="'.route($resource.'.destroy', $record).'"]//input[@name="_method" and @value="DELETE"]')->length)->toBe(1);
     }
 });
 
 it('opens only the matching contribution create panel for a named error bag', function (string $bag, string $panel) {
     $user = meProfileViewUser();
     $this->actingAs($user);
-    $errors = (new ViewErrorBag)->put($bag, new MessageBag(['title' => $bag . ' title is required.']));
+    $errors = (new ViewErrorBag)->put($bag, new MessageBag(['title' => $bag.' title is required.']));
 
     $dom = meProfileViewDom((string) $this->view('platform.sections.profile', compact('user', 'errors')));
 
     foreach (['Post', 'Project', 'Paper'] as $candidate) {
-        expect(meProfileViewHasClass($dom, 'collapseNew' . $candidate, 'show'))->toBe($candidate === $panel);
+        expect(meProfileViewHasClass($dom, 'collapseNew'.$candidate, 'show'))->toBe($candidate === $panel);
     }
 
-    expect($dom->evaluate('normalize-space(//*[@id="collapseNew' . $panel . '"])'))->toContain($bag . ' title is required.');
+    expect($dom->evaluate('normalize-space(//*[@id="collapseNew'.$panel.'"])'))->toContain($bag.' title is required.');
 })->with(['post' => ['post', 'Post'], 'project' => ['project', 'Project'], 'paper' => ['paper', 'Paper']]);
 
 it('opens the matching contribution create panel for its success flash', function (string $bag, string $panel) {
     $user = meProfileViewUser();
-    $this->actingAs($user)->withSession(['status_' . $bag => $bag . ' saved.']);
+    $this->actingAs($user)->withSession(['status_'.$bag => $bag.' saved.']);
 
     $dom = meProfileViewDom((string) $this->view('platform.sections.profile', compact('user')));
 
     foreach (['Post', 'Project', 'Paper'] as $candidate) {
-        expect(meProfileViewHasClass($dom, 'collapseNew' . $candidate, 'show'))->toBe($candidate === $panel);
+        expect(meProfileViewHasClass($dom, 'collapseNew'.$candidate, 'show'))->toBe($candidate === $panel);
     }
 
-    expect($dom->evaluate('normalize-space(//*[@id="collapseNew' . $panel . '"])'))->toContain($bag . ' saved.');
+    expect($dom->evaluate('normalize-space(//*[@id="collapseNew'.$panel.'"])'))->toContain($bag.' saved.');
 })->with(['post' => ['post', 'Post'], 'project' => ['project', 'Project'], 'paper' => ['paper', 'Paper']]);
 
 it('shares old input between contribution create forms', function () {
@@ -198,13 +199,13 @@ it('shares old input between contribution create forms', function () {
 
     // Error bags are separate, but old title/visibility values are shared by the create forms.
     foreach (['Post', 'Project', 'Paper'] as $panel) {
-        $form = '//*[@id="collapseNew' . $panel . '"]//form';
-        expect($dom->evaluate('string(' . $form . '//input[@name="title"]/@value)'))->toBe('Unsaved title')
-            ->and($dom->query($form . '//option[@value="private" and @selected]')->length)->toBe(1);
+        $form = '//*[@id="collapseNew'.$panel.'"]//form';
+        expect($dom->evaluate('string('.$form.'//input[@name="title"]/@value)'))->toBe('Unsaved title')
+            ->and($dom->query($form.'//option[@value="private" and @selected]')->length)->toBe(1);
     }
 
     foreach (['body' => 'Unsaved body', 'description' => 'Unsaved description', 'abstract' => 'Unsaved abstract', 'doi' => '10.1234/draft', 'pdf_url' => 'https://example.test/draft.pdf'] as $field => $value) {
-        expect($dom->evaluate('string(//textarea[@name="' . $field . '"])'))->toBe($value);
+        expect($dom->evaluate('string(//textarea[@name="'.$field.'"])'))->toBe($value);
     }
     expect($dom->evaluate('string(//input[@name="repo_url"]/@value)'))->toBe('https://example.test/draft-repo');
 });
@@ -256,9 +257,9 @@ it('renders account settings and all three partials through their support compon
         ->assertSeeText('Go back to Dashboard');
 
     foreach (['profile.update' => 'patch', 'password.update' => 'put', 'profile.destroy' => 'delete'] as $route => $method) {
-        $form = '//form[@action="' . route($route) . '" and .//input[@name="_method" and @value="' . $method . '"]]';
-        expect($dom->evaluate('string(' . $form . '//input[@name="_method"]/@value)'))->toBe($method)
-            ->and($dom->query($form . '//input[@name="_token"]')->length)->toBe(1);
+        $form = '//form[@action="'.route($route).'" and .//input[@name="_method" and @value="'.$method.'"]]';
+        expect($dom->evaluate('string('.$form.'//input[@name="_method"]/@value)'))->toBe($method)
+            ->and($dom->query($form.'//input[@name="_token"]')->length)->toBe(1);
     }
 
     expect($dom->evaluate('string(//form[@id="send-verification"]/@action)'))->toBe(route('verification.send'))
@@ -283,11 +284,11 @@ it('uses account old input and isolates default, password and deletion error bag
 
     expect($dom->evaluate('string(//input[@id="name"]/@value)'))->toBe('Draft <Name>')
         ->and($dom->evaluate('string(//input[@id="email"]/@value)'))->toBe('draft@example.test')
-        ->and($dom->evaluate('normalize-space(//form[@action="' . route('profile.update') . '" and .//input[@name="_method" and @value="patch"]])'))->toContain('Account name error.', 'Account email error.')
-        ->and($dom->evaluate('normalize-space(//form[@action="' . route('password.update') . '"])'))->toContain('Current password error.', 'New password error.', 'Confirmation error.')
-        ->and($dom->evaluate('normalize-space(//form[@action="' . route('password.update') . '"])'))->not->toContain('Deletion password error.')
-        ->and($dom->evaluate('normalize-space(//form[@action="' . route('profile.destroy') . '" and .//input[@name="_method" and @value="delete"]])'))->toContain('Deletion password error.')
-        ->and($dom->evaluate('normalize-space(//form[@action="' . route('profile.destroy') . '" and .//input[@name="_method" and @value="delete"]])'))->not->toContain('New password error.')
+        ->and($dom->evaluate('normalize-space(//form[@action="'.route('profile.update').'" and .//input[@name="_method" and @value="patch"]])'))->toContain('Account name error.', 'Account email error.')
+        ->and($dom->evaluate('normalize-space(//form[@action="'.route('password.update').'"])'))->toContain('Current password error.', 'New password error.', 'Confirmation error.')
+        ->and($dom->evaluate('normalize-space(//form[@action="'.route('password.update').'"])'))->not->toContain('Deletion password error.')
+        ->and($dom->evaluate('normalize-space(//form[@action="'.route('profile.destroy').'" and .//input[@name="_method" and @value="delete"]])'))->toContain('Deletion password error.')
+        ->and($dom->evaluate('normalize-space(//form[@action="'.route('profile.destroy').'" and .//input[@name="_method" and @value="delete"]])'))->not->toContain('New password error.')
         ->and($dom->query('//div[contains(@class, "invalid-feedback")]')->length)->toBe(6)
         ->and($dom->evaluate('string(//div[@*[name()="data-x-on:close.stop"]]/@style)'))->toBe('display: block;');
     $view->assertDontSee('must-not-render');
@@ -303,10 +304,12 @@ it('renders the existing account saved-state tokens without treating the control
 })->with(['profile token' => ['profile-updated', 1], 'password token' => ['password-updated', 1], 'current profile controller message' => ['Profile updated.', 0]]);
 
 it('keeps the verification reminder conditional on the MustVerifyEmail contract', function () {
-    $user = new class extends \Illuminate\Foundation\Auth\User {
-        use \Spatie\Permission\Traits\HasRoles;
+    $user = new class extends Illuminate\Foundation\Auth\User
+    {
+        use HasRoles;
 
         protected $table = 'users';
+
         protected $guarded = [];
     };
 

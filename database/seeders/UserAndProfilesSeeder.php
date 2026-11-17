@@ -68,7 +68,7 @@ class UserAndProfilesSeeder extends Seeder
 
             $this->createOrUpdateUser(
                 $name,
-                $emailSlug . '.' . str_pad((string) $i, 3, '0', STR_PAD_LEFT) . '@example.com',
+                $emailSlug.'.'.str_pad((string) $i, 3, '0', STR_PAD_LEFT).'@example.com',
                 $role,
                 $this->flagsForRole($role)
             );
@@ -93,10 +93,10 @@ class UserAndProfilesSeeder extends Seeder
             Profile::updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'bio' => 'Community profile for ' . $user->name . '. Focused on practical learning, collaboration, and mentorship.',
+                    'bio' => 'Community profile for '.$user->name.'. Focused on practical learning, collaboration, and mentorship.',
                     'details' => collect($skills)->shuffle()->take(4)->values()->all(),
-                    'resume_link' => 'https://example.com/resumes/' . $user->id,
-                    'picture_url' => 'https://i.pravatar.cc/200?img=' . (($index % 70) + 1),
+                    'resume_link' => 'https://example.com/resumes/'.$user->id,
+                    'picture_url' => 'https://i.pravatar.cc/200?img='.(($index % 70) + 1),
                 ]
             );
         });

@@ -26,7 +26,7 @@ class ProjectsEcosystemSeeder extends Seeder
             $project = Project::create([
                 'title' => $projectTitle,
                 'description' => 'Applied team project focused on delivery quality, collaboration, and measurable outcomes for community stakeholders.',
-                'repo_url' => 'https://github.com/nmtafe-alumni/project-' . $i,
+                'repo_url' => 'https://github.com/nmtafe-alumni/project-'.$i,
                 'visibility' => $i % 4 === 0 ? 'private' : 'public',
             ]);
 
@@ -40,9 +40,9 @@ class ProjectsEcosystemSeeder extends Seeder
 
             ProjectProfile::create([
                 'project_id' => $project->id,
-                'bio' => 'Project profile for ' . $projectTitle . '.',
+                'bio' => 'Project profile for '.$projectTitle.'.',
                 'details' => ['Planning', 'Execution', 'Review', 'Iteration'],
-                'picture_url' => 'https://picsum.photos/seed/project-' . $i . '/640/360',
+                'picture_url' => 'https://picsum.photos/seed/project-'.$i.'/640/360',
             ]);
         }
 
@@ -81,7 +81,7 @@ class ProjectsEcosystemSeeder extends Seeder
         ];
 
         return $focuses[($index - 1) % count($focuses)]
-            . ' - '
-            . $themes[((int) ceil($index / count($focuses)) - 1) % count($themes)];
+            .' - '
+            .$themes[((int) ceil($index / count($focuses)) - 1) % count($themes)];
     }
 }
