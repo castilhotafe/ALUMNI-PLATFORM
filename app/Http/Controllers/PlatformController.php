@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EnrolmentListing;
 use App\Models\Group;
 use App\Models\JobListing;
+use App\Models\Post;
 use App\Models\Project;
 use App\Models\ResearchPaper;
 use App\Models\User;
@@ -93,6 +94,21 @@ class PlatformController extends Controller
     private function communityRoles(): array
     {
         return ['Current Student', 'Alumni', 'Lecturer', 'Partner', 'General User', 'Admin'];
+    }
+
+    private function paginateCollection(Collection $items, int $perPage, int $page): array
+    {
+        $totalItems = $items->count();
+        $totalPages = max(1, (int) ceil($totalItems / $perPage));
+        $currentPage = max(1, min($page, $totalPages));
+
+        return [
+            'items' => $items->forPage($currentPage, $perPage)->values(),
+            'current_page' => $currentPage,
+            'total_pages' => $totalPages,
+            'total_items' => $totalItems,
+            'per_page' => $perPage,
+        ];
     }
 
     public function projects(Request $request): View
@@ -431,6 +447,96 @@ class PlatformController extends Controller
             'searchQuery' => $search,
             'selectedDetails' => $selectedDetails,
             'detailOptions' => $detailOptions,
+        ]);
+    }
+
+    public function dashboard(Request $request): View
+    {
+        $user = $request->user();
+        $search = $this->searchQuery($request);
+
+        $metrics = [
+            ['label' => 'Recent posts', 'value' => Post::visibleTo($user)->count(), 'note' => 'Updates from alumni and staff'],
+            ['label' => 'Projects', 'value' => Project::count(), 'note' => 'Collaborative workspaces'],
+            ['label' => 'Research Papers', 'value' => ResearchPaper::count(), 'note' => 'Academic contributions'],
+            ['label' => 'Groups', 'value' => Group::count(), 'note' => 'Networking circles'],
+            ['label' => 'Job Listings', 'value' => JobListing::count(), 'note' => 'Opportunities for alumni'],
+            ['label' => 'Enrolment Listings', 'value' => EnrolmentListing::count(), 'note' => 'Educational opportunities'],
+            ['label' => 'Community members', 'value' => User::role($this->communityRoles())->count(), 'note' => 'Active directory profiles'],
+            ['label' => 'Partner Organisations', 'value' => User::where('isPartner', true)->count(), 'note' => 'Verified partner organisations'],
+            ['label' => 'Lecturers', 'value' => User::where('isLecturer', true)->count(), 'note' => 'Verified lecturers'],
+            ['label' => 'Alumni', 'value' => User::where('isAlumni', true)->count(), 'note' => 'Verified alumni'],
+            ['label' => 'Current Students', 'value' => User::where('isCurrent', true)->count(), 'note' => 'Verified current students'],
+            ['label' => 'General Users', 'value' => User::whereHas('roles', fn($query) => $query->where('name', 'General User'))->count(), 'note' => 'Users without specific roles'],
+        ];
+
+        $recentPostsAll = Post::with('user.profile')->visibleTo($user)->latest()->get();
+        $recentContentAll = $recentPostsAll->map(fn($post) => [
+            'type' => 'post',
+            'item' => $post,
+            'time' => $post->created_at,
+        ])->sortByDesc('time')->values();
+
+        $projectsAll = Project::with('users.profile')->visibleTo($user)->latest()->get();
+        $papersAll = ResearchPaper::with('users.profile')->visibleTo($user)->latest()->get();
+        $groupsAll = Group::with('creator.profile')->latest()->get();
+        $jobListingsAll = JobListing::with('creator.profile')->latest()->get();
+        $enrolmentListingsAll = EnrolmentListing::with('creator.profile')->latest()->get();
+
+        $networkPulseAll = collect()
+            ->concat($projectsAll->map(fn($project) => [
+                'type' => 'project',
+                'item' => $project,
+                'time' => $project->created_at,
+            ]))
+            ->concat($papersAll->map(fn($paper) => [
+                'type' => 'paper',
+                'item' => $paper,
+                'time' => $paper->created_at,
+            ]))
+            ->concat($groupsAll->map(fn($group) => [
+                'type' => 'group',
+                'item' => $group,
+                'time' => $group->created_at,
+            ]))
+            ->concat($jobListingsAll->map(fn($jobListing) => [
+                'type' => 'job',
+                'item' => $jobListing,
+                'time' => $jobListing->created_at,
+            ]))
+            ->concat($enrolmentListingsAll->map(fn($enrolmentListing) => [
+                'type' => 'enrolment',
+                'item' => $enrolmentListing,
+                'time' => $enrolmentListing->created_at,
+            ]))
+            ->sortByDesc('time')
+            ->values();
+
+        $topProfilesAll = User::with('profile')->withCount(['posts', 'projects', 'researchPapers'])
+            ->role($this->communityRoles())
+            ->latest()
+            ->get();
+
+        $perPage = 6;
+        $contentPage = (int) $request->query('content_page', 1);
+        $activityPage = (int) $request->query('activity_page', 1);
+        $membersPage = (int) $request->query('members_page', 1);
+
+        $recentContentPagination = $this->paginateCollection($recentContentAll, $perPage, $contentPage);
+        $networkPulsePagination = $this->paginateCollection($networkPulseAll, $perPage, $activityPage);
+        $membersPagination = $this->paginateCollection($topProfilesAll, $perPage, $membersPage);
+
+        return view('platform.section', [
+            'section' => 'dashboard',
+            'pageTitle' => 'Dashboard',
+            'sectionKicker' => 'Overview',
+            'metrics' => $metrics,
+            'recentContent' => $recentContentPagination['items'],
+            'networkPulse' => $networkPulsePagination['items'],
+            'topProfiles' => $membersPagination['items'],
+            'recentContentPagination' => $recentContentPagination,
+            'networkPulsePagination' => $networkPulsePagination,
+            'membersPagination' => $membersPagination,
         ]);
     }
 }
