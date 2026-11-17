@@ -10,6 +10,9 @@ use Illuminate\Support\Arr;
 
 class ProjectController extends Controller
 {
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(StoreProjectRequest $request): RedirectResponse
     {
         $validated = $request->validated();
@@ -19,14 +22,14 @@ class ProjectController extends Controller
         $project->users()->attach($request->user()->id, ['contribution_role' => 'Owner']);
 
         $collaborators = collect($validated['collaborators'] ?? [])
-            ->filter(fn ($collaborator) => filled($collaborator['name'] ?? null))
-            ->map(fn ($collaborator) => [
+            ->filter(fn($collaborator) => filled($collaborator['name'] ?? null))
+            ->map(fn($collaborator) => [
                 'name' => $collaborator['name'],
                 'role' => $collaborator['role'] ?? null,
             ]);
 
         $ownerName = $request->user()->name;
-        if (! $collaborators->contains(fn ($collaborator) => strcasecmp($collaborator['name'], $ownerName) === 0)) {
+        if (! $collaborators->contains(fn($collaborator) => strcasecmp($collaborator['name'], $ownerName) === 0)) {
             $collaborators->push([
                 'name' => $ownerName,
                 'role' => 'Owner',
@@ -40,7 +43,7 @@ class ProjectController extends Controller
         $profileData = [
             'bio' => $validated['profile_bio'] ?? null,
             'details' => collect($validated['profile_details'] ?? [])
-                ->filter(fn ($detail) => filled($detail))
+                ->filter(fn($detail) => filled($detail))
                 ->values()
                 ->all(),
             'picture_url' => $validated['picture_url'] ?? null,
@@ -53,6 +56,9 @@ class ProjectController extends Controller
         return back()->with('status_project', 'Project created.');
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(UpdateProjectRequest $request, Project $project): RedirectResponse
     {
         $validated = $request->validated();
@@ -62,14 +68,14 @@ class ProjectController extends Controller
 
         if ($request->has('collaborators')) {
             $collaborators = collect($validated['collaborators'] ?? [])
-                ->filter(fn ($collaborator) => filled($collaborator['name'] ?? null))
-                ->map(fn ($collaborator) => [
+                ->filter(fn($collaborator) => filled($collaborator['name'] ?? null))
+                ->map(fn($collaborator) => [
                     'name' => $collaborator['name'],
                     'role' => $collaborator['role'] ?? null,
                 ]);
 
             $ownerName = $request->user()->name;
-            if (! $collaborators->contains(fn ($collaborator) => strcasecmp($collaborator['name'], $ownerName) === 0)) {
+            if (! $collaborators->contains(fn($collaborator) => strcasecmp($collaborator['name'], $ownerName) === 0)) {
                 $collaborators->push([
                     'name' => $ownerName,
                     'role' => 'Owner',
@@ -94,9 +100,9 @@ class ProjectController extends Controller
 
                 'details' => $request->has('profile_details')
                     ? collect($validated['profile_details'] ?? [])
-                        ->filter(fn ($detail) => filled($detail))
-                        ->values()
-                        ->all()
+                    ->filter(fn($detail) => filled($detail))
+                    ->values()
+                    ->all()
                     : ($project->profile?->details ?? []),
             ];
 
@@ -110,6 +116,9 @@ class ProjectController extends Controller
         return back()->with('status', 'Project updated.');
     }
 
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(Project $project): RedirectResponse
     {
         $project->delete();

@@ -19,15 +19,15 @@ class PaperController extends Controller
         $paper->users()->attach($request->user()->id, ['author_order' => 1]);
 
         $authors = collect($validated['authors'] ?? [])
-            ->filter(fn ($author) => filled($author['name'] ?? null))
+            ->filter(fn($author) => filled($author['name'] ?? null))
             ->values()
-            ->map(fn ($author, int $index) => [
+            ->map(fn($author, int $index) => [
                 'name' => $author['name'],
                 'author_order' => isset($author['order']) ? (int) $author['order'] : $index + 1,
             ]);
 
         $ownerName = $request->user()->name;
-        if (! $authors->contains(fn ($author) => strcasecmp($author['name'], $ownerName) === 0)) {
+        if (! $authors->contains(fn($author) => strcasecmp($author['name'], $ownerName) === 0)) {
             $authors->prepend([
                 'name' => $ownerName,
                 'author_order' => 1,
@@ -41,7 +41,7 @@ class PaperController extends Controller
         $profileData = [
             'bio' => $validated['profile_bio'] ?? null,
             'details' => collect($validated['profile_details'] ?? [])
-                ->filter(fn ($detail) => filled($detail))
+                ->filter(fn($detail) => filled($detail))
                 ->values()
                 ->all(),
             'picture_url' => $validated['picture_url'] ?? null,
@@ -63,15 +63,15 @@ class PaperController extends Controller
 
         if ($request->has('authors')) {
             $authors = collect($validated['authors'] ?? [])
-                ->filter(fn ($author) => filled($author['name'] ?? null))
+                ->filter(fn($author) => filled($author['name'] ?? null))
                 ->values()
-                ->map(fn ($author, int $index) => [
+                ->map(fn($author, int $index) => [
                     'name' => $author['name'],
                     'author_order' => isset($author['order']) ? (int) $author['order'] : $index + 1,
                 ]);
 
             $ownerName = $request->user()->name;
-            if (! $authors->contains(fn ($author) => strcasecmp($author['name'], $ownerName) === 0)) {
+            if (! $authors->contains(fn($author) => strcasecmp($author['name'], $ownerName) === 0)) {
                 $authors->prepend([
                     'name' => $ownerName,
                     'author_order' => 1,
@@ -96,9 +96,9 @@ class PaperController extends Controller
 
                 'details' => $request->has('profile_details')
                     ? collect($validated['profile_details'] ?? [])
-                        ->filter(fn ($detail) => filled($detail))
-                        ->values()
-                        ->all()
+                    ->filter(fn($detail) => filled($detail))
+                    ->values()
+                    ->all()
                     : ($paper->profile?->details ?? []),
             ];
 
