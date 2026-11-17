@@ -75,6 +75,17 @@ describe('User Model Relationships', function () {
         expect($user->researchPapers)->toHaveCount(1)
             ->and($user->researchPapers->first()->pivot->author_order)->toBe(1);
     });
+
+    it('belongs to many groups with member_role pivot data', function () {
+        $user = User::factory()->create();
+        $group = \App\Models\Group::factory()->create();
+
+        $user->groups()->attach($group->id, ['member_role' => 'owner']);
+
+        expect($user->groups)->toHaveCount(1)
+            ->and($user->groups->first()->id)->toBe($group->id)
+            ->and($user->groups->first()->pivot->member_role)->toBe('owner');
+    });
 });
 
 describe('User Model Role Label Logic (selfDeclaredRoleLabel)', function () {

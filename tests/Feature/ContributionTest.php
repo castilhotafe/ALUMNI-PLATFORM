@@ -100,7 +100,7 @@ describe('HasContributions Trait Methods & Accessors', function () {
     it('throws an InvalidArgumentException when adding a zero-point contribution', function () {
         $user = User::factory()->create();
 
-        expect(fn () => $user->addContribution(0, 'Zero points test'))
+        expect(fn() => $user->addContribution(0, 'Zero points test'))
             ->toThrow(InvalidArgumentException::class, 'Contribution amount must not be zero.');
     });
 
@@ -171,5 +171,63 @@ describe('HasContributions Trait Methods & Accessors', function () {
         $user = User::factory()->create();
 
         expect($user->tafe_badge)->toBe('First-Year');
+    });
+});
+
+describe('RecordContribution Listener', function () {
+
+    it('ignores unregistered event keys without creating a contribution record', function () {
+        config()->set('contributions.events', []);
+        $user = User::factory()->create();
+
+        \App\Events\ContributionTriggered::dispatch($user, 'unregistered_event_key');
+
+        expect($user->contributions()->count())->toBe(0);
+    });
+
+    it('ignores events configured with zero points', function () {
+        config()->set('contributions.events.zero_point_event', [
+            'points' => 0,
+            'reason' => 'No points awarded',
+        ]);
+        $user = User::factory()->create();
+
+        \App\Events\ContributionTriggered::dispatch($user, 'zero_point_event');
+
+        expect($user->contributions()->count())->toBe(0);
+    });
+
+    it('deducts points when an event is configured with negative points', function () {
+        config()->set('contributions.events.penalty_event', [
+            'points' => -15,
+            'reason' => 'Content removed',
+        ]);
+        $user = User::factory()->create();
+
+        \App\Events\ContributionTriggered::dispatch($user, 'penalty_event');
+
+        $this->assertDatabaseHas('contributions', [
+            'user_id' => $user->id,
+            'amount' => -15,
+            'reason' => 'Content removed',
+        ]);
+    });
+
+    it('awards points and generates a fallback reason when reason is omitted', function () {
+        config()->set('contributions.events.custom_milestone_reached', [
+            'points' => 25,
+        ]);
+        $user = User::factory()->create();
+        $project = Project::factory()->create();
+
+        \App\Events\ContributionTriggered::dispatch($user, 'custom_milestone_reached', $project);
+
+        $this->assertDatabaseHas('contributions', [
+            'user_id' => $user->id,
+            'amount' => 25,
+            'reason' => 'Custom Milestone Reached',
+            'reference_type' => $project->getMorphClass(),
+            'reference_id' => $project->id,
+        ]);
     });
 });

@@ -193,6 +193,68 @@ describe('Job Listing Update Action', function () {
             ])
             ->assertForbidden();
     });
+
+    it('updates an existing job listing profile record when one already exists', function () {
+        $creator = User::factory()->create();
+        $creator->givePermissionTo('create job listings');
+
+        $jobListing = JobListing::factory()->create([
+            'creator_user_id' => $creator->id,
+        ]);
+        $existingProfile = JobListingProfile::factory()->create([
+            'job_listing_id' => $jobListing->id,
+            'bio' => 'Initial job bio',
+            'details' => ['Contract'],
+        ]);
+
+        actingAs($creator)
+            ->from('/discover')
+            ->patch(route('job-listings.update', $jobListing), [
+                'title' => $jobListing->title,
+                'company' => $jobListing->company,
+                'description' => $jobListing->description,
+                'job_profile_bio' => 'Overwritten job bio',
+                'job_profile_details' => ['Permanent', 'Perth'],
+                'job_picture_url' => 'https://example.com/updated-job.png',
+            ])
+            ->assertRedirect('/discover')
+            ->assertSessionHas('status_job_listing_manage', 'Job listing updated.');
+
+        expect($existingProfile->fresh())
+            ->bio->toBe('Overwritten job bio')
+            ->details->toBe(['Permanent', 'Perth'])
+            ->picture_url->toBe('https://example.com/updated-job.png');
+    });
+
+    it('denies unverified partners or lecturers from updating a job listing', function () {
+        $unverifiedLecturer = User::factory()->create([
+            'isLecturer' => true,
+            'isVerifiedLecturer' => false,
+        ]);
+        $unverifiedLecturer->givePermissionTo('create job listings');
+
+        $jobListing = JobListing::factory()->create([
+            'creator_user_id' => $unverifiedLecturer->id,
+        ]);
+
+        actingAs($unverifiedLecturer)
+            ->patch(route('job-listings.update', $jobListing), [
+                'title' => 'Blocked Job Update',
+                'company' => 'Company',
+                'description' => 'Should be forbidden by policy line 22.',
+            ])
+            ->assertForbidden();
+    });
+
+    it('denies users lacking create job listings permission from updating a job listing', function () {
+        $creatorWithoutPermission = User::factory()->create();
+        $jobListing = JobListing::factory()->create([
+            'creator_user_id' => $creatorWithoutPermission->id,
+        ]);
+
+        expect(\Illuminate\Support\Facades\Gate::forUser($creatorWithoutPermission)->denies('update', $jobListing))
+            ->toBeTrue();
+    });
 });
 
 describe('Job Listing Destroy Action', function () {

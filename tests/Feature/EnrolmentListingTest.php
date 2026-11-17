@@ -195,6 +195,67 @@ describe('Enrolment Listing Update Action', function () {
             ])
             ->assertForbidden();
     });
+
+    it('updates an existing enrolment listing profile record when one already exists', function () {
+        $creator = User::factory()->create();
+        $creator->givePermissionTo('create enrolment listings');
+
+        $enrolmentListing = EnrolmentListing::factory()->create([
+            'creator_user_id' => $creator->id,
+        ]);
+        $existingProfile = EnrolmentListingProfile::factory()->create([
+            'enrolment_listing_id' => $enrolmentListing->id,
+            'bio' => 'Initial enrolment bio',
+            'details' => ['Old Tag'],
+        ]);
+
+        actingAs($creator)
+            ->from('/discover')
+            ->patch(route('enrolment-listings.update', $enrolmentListing), [
+                'course_title' => $enrolmentListing->course_title,
+                'tafe_provider' => $enrolmentListing->tafe_provider,
+                'description' => $enrolmentListing->description,
+                'enrolment_profile_bio' => 'Overwritten enrolment bio',
+                'enrolment_profile_details' => ['New Tag'],
+                'enrolment_picture_url' => 'https://example.com/updated-enrol.png',
+            ])
+            ->assertRedirect('/discover')
+            ->assertSessionHas('status_enrolment_listing_manage', 'Enrolment listing updated.');
+
+        expect($existingProfile->fresh())
+            ->bio->toBe('Overwritten enrolment bio')
+            ->details->toBe(['New Tag'])
+            ->picture_url->toBe('https://example.com/updated-enrol.png');
+    });
+    it('denies unverified partners or lecturers from updating an enrolment listing', function () {
+        $unverifiedPartner = User::factory()->create([
+            'isPartner' => true,
+            'isVerifiedPartner' => false,
+        ]);
+        $unverifiedPartner->givePermissionTo('create enrolment listings');
+
+        $enrolmentListing = EnrolmentListing::factory()->create([
+            'creator_user_id' => $unverifiedPartner->id,
+        ]);
+
+        actingAs($unverifiedPartner)
+            ->patch(route('enrolment-listings.update', $enrolmentListing), [
+                'course_title' => 'Blocked Update',
+                'tafe_provider' => 'TAFE Provider',
+                'description' => 'Should be forbidden by policy line 22.',
+            ])
+            ->assertForbidden();
+    });
+
+    it('denies users lacking create enrolment listings permission from updating a listing', function () {
+        $creatorWithoutPermission = User::factory()->create();
+        $enrolmentListing = EnrolmentListing::factory()->create([
+            'creator_user_id' => $creatorWithoutPermission->id,
+        ]);
+
+        expect(\Illuminate\Support\Facades\Gate::forUser($creatorWithoutPermission)->denies('update', $enrolmentListing))
+            ->toBeTrue();
+    });
 });
 
 describe('Enrolment Listing Destroy Action', function () {

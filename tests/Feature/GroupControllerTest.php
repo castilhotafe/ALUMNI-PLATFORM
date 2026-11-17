@@ -187,6 +187,35 @@ describe('Group Controller Workflows', function () {
                 ])
                 ->assertForbidden();
         });
+
+        it('updates an existing group profile record when one already exists', function () {
+            $creator = User::factory()->create();
+            $group = Group::factory()->create([
+                'creator_user_id' => $creator->id,
+            ]);
+            $existingProfile = $group->profile()->create([
+                'bio' => 'Initial group bio',
+                'details' => ['Old Skill'],
+                'picture_url' => 'https://example.com/old-group.jpg',
+            ]);
+
+            actingAs($creator)
+                ->from('/networking')
+                ->patch(route('groups.update', $group), [
+                    'name' => $group->name,
+                    'description' => $group->description,
+                    'profile_bio' => 'Overwritten group bio',
+                    'profile_details' => ['Updated Skill'],
+                    'picture_url' => 'https://example.com/new-group.jpg',
+                ])
+                ->assertRedirect('/networking')
+                ->assertSessionHas('status', 'Group updated.');
+
+            expect($existingProfile->fresh())
+                ->bio->toBe('Overwritten group bio')
+                ->details->toBe(['Updated Skill'])
+                ->picture_url->toBe('https://example.com/new-group.jpg');
+        });
     });
 
     describe('Destroy Group Action', function () {

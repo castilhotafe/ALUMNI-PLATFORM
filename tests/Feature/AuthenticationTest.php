@@ -126,4 +126,18 @@ describe('Web Authentication Logic', function () {
         });
     });
 });
-// test 2
+
+describe('Auth Screens (GET)', function () {
+
+    it('renders the login screen for guests', function () {
+        $this->get('/login')
+            ->assertOk()
+            ->assertViewIs('auth.login');
+    });
+
+    it('renders the registration screen for guests', function () {
+        $this->get('/register')
+            ->assertOk()
+            ->assertViewIs('auth.register');
+    });
+});
