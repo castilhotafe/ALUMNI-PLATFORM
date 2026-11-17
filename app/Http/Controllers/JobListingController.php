@@ -18,7 +18,7 @@ class JobListingController extends Controller
         return [
             'bio' => $validated["{$prefix}_profile_bio"] ?? null,
             'details' => collect($validated["{$prefix}_profile_details"] ?? [])
-                ->filter(fn($detail) => filled($detail))
+                ->filter(fn ($detail) => filled($detail))
                 ->values()
                 ->all(),
             'picture_url' => $validated["{$prefix}_picture_url"] ?? null,

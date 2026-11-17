@@ -26,7 +26,7 @@ class PlatformController extends Controller
     {
         return collect($request->input('details', []))
             ->flatten()
-            ->map(fn($value) => trim((string) $value))
+            ->map(fn ($value) => trim((string) $value))
             ->filter()
             ->unique()
             ->values()
@@ -47,7 +47,7 @@ class PlatformController extends Controller
 
                 return [$value];
             })
-            ->map(fn($value) => trim((string) $value))
+            ->map(fn ($value) => trim((string) $value))
             ->filter()
             ->values();
     }
@@ -64,7 +64,7 @@ class PlatformController extends Controller
             return true;
         }
 
-        $normalizedTokens = $tokens->map(fn($value) => Str::lower($value))->all();
+        $normalizedTokens = $tokens->map(fn ($value) => Str::lower($value))->all();
 
         foreach ($selectedDetails as $detail) {
             if (! in_array(Str::lower($detail), $normalizedTokens, true)) {
@@ -123,7 +123,7 @@ class PlatformController extends Controller
             ->get();
 
         $projects = $allProjects
-            ->filter(fn($project) => $this->matchesSearch([
+            ->filter(fn ($project) => $this->matchesSearch([
                 $project->title,
                 $project->description,
                 $project->profile?->bio,
@@ -137,7 +137,7 @@ class PlatformController extends Controller
             ->withCount('collaborators')
             ->orderByDesc('projects.created_at')
             ->get()
-            ->filter(fn($project) => $this->matchesSearch([
+            ->filter(fn ($project) => $this->matchesSearch([
                 $project->title,
                 $project->description,
                 $project->profile?->bio,
@@ -147,7 +147,7 @@ class PlatformController extends Controller
             ->values();
 
         $detailOptions = $allProjects
-            ->flatMap(fn($project) => $project->profile?->details ?? [])
+            ->flatMap(fn ($project) => $project->profile?->details ?? [])
             ->filter()
             ->unique()
             ->sort()
@@ -178,7 +178,7 @@ class PlatformController extends Controller
             ->get();
 
         $papers = $allPapers
-            ->filter(fn($paper) => $this->matchesSearch([
+            ->filter(fn ($paper) => $this->matchesSearch([
                 $paper->title,
                 $paper->abstract,
                 $paper->doi,
@@ -192,7 +192,7 @@ class PlatformController extends Controller
             ->withCount('authors')
             ->orderByDesc('research_papers.created_at')
             ->get()
-            ->filter(fn($paper) => $this->matchesSearch([
+            ->filter(fn ($paper) => $this->matchesSearch([
                 $paper->title,
                 $paper->abstract,
                 $paper->doi,
@@ -203,7 +203,7 @@ class PlatformController extends Controller
             ->values();
 
         $detailOptions = $allPapers
-            ->flatMap(fn($paper) => $paper->profile?->details ?? [])
+            ->flatMap(fn ($paper) => $paper->profile?->details ?? [])
             ->filter()
             ->unique()
             ->sort()
@@ -227,9 +227,9 @@ class PlatformController extends Controller
         $search = $this->searchQuery($request);
         $user = $request->user()->load([
             'profile',
-            'posts' => fn($query) => $query->latest(),
-            'projects' => fn($query) => $query->with('collaborators')->orderByDesc('projects.created_at')->take(10),
-            'researchPapers' => fn($query) => $query->with('authors')->orderByDesc('research_papers.created_at')->take(10),
+            'posts' => fn ($query) => $query->latest(),
+            'projects' => fn ($query) => $query->with('collaborators')->orderByDesc('projects.created_at')->take(10),
+            'researchPapers' => fn ($query) => $query->with('authors')->orderByDesc('research_papers.created_at')->take(10),
         ]);
 
         return view('platform.section', [
@@ -252,7 +252,7 @@ class PlatformController extends Controller
             ->get();
 
         $users = $allUsers
-            ->filter(fn($user) => $this->matchesSearch([
+            ->filter(fn ($user) => $this->matchesSearch([
                 $user->name,
                 $user->profile?->bio,
                 $user->profile?->details ?? [],
@@ -260,7 +260,7 @@ class PlatformController extends Controller
             ->values();
 
         $detailOptions = $allUsers
-            ->flatMap(fn($user) => $user->profile?->details ?? [])
+            ->flatMap(fn ($user) => $user->profile?->details ?? [])
             ->filter()
             ->unique()
             ->sort()
@@ -289,7 +289,7 @@ class PlatformController extends Controller
             ->get();
 
         $groups = $allGroups
-            ->filter(fn($group) => $this->matchesSearch([
+            ->filter(fn ($group) => $this->matchesSearch([
                 $group->name,
                 $group->description,
                 $group->profile?->bio,
@@ -302,11 +302,11 @@ class PlatformController extends Controller
             ->values();
 
         $memberGroups = Group::with(['creator.profile', 'members.profile', 'projects', 'researchPapers', 'profile'])
-            ->whereHas('members', fn($query) => $query->whereKey($user->id))
+            ->whereHas('members', fn ($query) => $query->whereKey($user->id))
             ->withCount(['members', 'projects', 'researchPapers'])
             ->orderByDesc('groups.created_at')
             ->get()
-            ->filter(fn($group) => $this->matchesSearch([
+            ->filter(fn ($group) => $this->matchesSearch([
                 $group->name,
                 $group->description,
                 $group->profile?->bio,
@@ -319,7 +319,7 @@ class PlatformController extends Controller
             ->values();
 
         $detailOptions = $allGroups
-            ->flatMap(fn($group) => $group->profile?->details ?? [])
+            ->flatMap(fn ($group) => $group->profile?->details ?? [])
             ->filter()
             ->unique()
             ->sort()
@@ -378,17 +378,17 @@ class PlatformController extends Controller
             $user = $request->user();
 
             $manageableJobListings = JobListing::with('creator.profile')
-                ->when(! $user->hasRole('Admin'), fn($query) => $query->where('creator_user_id', $user->id))
+                ->when(! $user->hasRole('Admin'), fn ($query) => $query->where('creator_user_id', $user->id))
                 ->latest()
                 ->get();
 
             $manageableEnrolmentListings = EnrolmentListing::with('creator.profile')
-                ->when(! $user->hasRole('Admin'), fn($query) => $query->where('creator_user_id', $user->id))
+                ->when(! $user->hasRole('Admin'), fn ($query) => $query->where('creator_user_id', $user->id))
                 ->latest()
                 ->get();
         }
 
-        $jobListingsFiltered = $allJobListings->filter(fn($listing) => $this->matchesSearch([
+        $jobListingsFiltered = $allJobListings->filter(fn ($listing) => $this->matchesSearch([
             $listing->title,
             $listing->company,
             $listing->description,
@@ -396,7 +396,7 @@ class PlatformController extends Controller
             $listing->profile?->details ?? [],
         ], $search, $selectedDetails))->values();
 
-        $enrolmentListingsFiltered = $allEnrolmentListings->filter(fn($listing) => $this->matchesSearch([
+        $enrolmentListingsFiltered = $allEnrolmentListings->filter(fn ($listing) => $this->matchesSearch([
             $listing->course_title,
             $listing->tafe_provider,
             $listing->description,
@@ -404,7 +404,7 @@ class PlatformController extends Controller
             $listing->profile?->details ?? [],
         ], $search, $selectedDetails))->values();
 
-        $manageableJobListings = $manageableJobListings->filter(fn($listing) => $this->matchesSearch([
+        $manageableJobListings = $manageableJobListings->filter(fn ($listing) => $this->matchesSearch([
             $listing->title,
             $listing->company,
             $listing->description,
@@ -412,7 +412,7 @@ class PlatformController extends Controller
             $listing->profile?->details ?? [],
         ], $search, $selectedDetails))->values();
 
-        $manageableEnrolmentListings = $manageableEnrolmentListings->filter(fn($listing) => $this->matchesSearch([
+        $manageableEnrolmentListings = $manageableEnrolmentListings->filter(fn ($listing) => $this->matchesSearch([
             $listing->course_title,
             $listing->tafe_provider,
             $listing->description,
@@ -428,7 +428,7 @@ class PlatformController extends Controller
             ->concat($allEnrolmentListings)
             ->concat($manageableJobListings)
             ->concat($manageableEnrolmentListings)
-            ->flatMap(fn($listing) => $listing->profile?->details ?? [])
+            ->flatMap(fn ($listing) => $listing->profile?->details ?? [])
             ->filter()
             ->unique()
             ->sort()
@@ -467,11 +467,11 @@ class PlatformController extends Controller
             ['label' => 'Lecturers', 'value' => User::where('isLecturer', true)->count(), 'note' => 'Verified lecturers'],
             ['label' => 'Alumni', 'value' => User::where('isAlumni', true)->count(), 'note' => 'Verified alumni'],
             ['label' => 'Current Students', 'value' => User::where('isCurrent', true)->count(), 'note' => 'Verified current students'],
-            ['label' => 'General Users', 'value' => User::whereHas('roles', fn($query) => $query->where('name', 'General User'))->count(), 'note' => 'Users without specific roles'],
+            ['label' => 'General Users', 'value' => User::whereHas('roles', fn ($query) => $query->where('name', 'General User'))->count(), 'note' => 'Users without specific roles'],
         ];
 
         $recentPostsAll = Post::with('user.profile')->visibleTo($user)->latest()->get();
-        $recentContentAll = $recentPostsAll->map(fn($post) => [
+        $recentContentAll = $recentPostsAll->map(fn ($post) => [
             'type' => 'post',
             'item' => $post,
             'time' => $post->created_at,
@@ -484,27 +484,27 @@ class PlatformController extends Controller
         $enrolmentListingsAll = EnrolmentListing::with('creator.profile')->latest()->get();
 
         $networkPulseAll = collect()
-            ->concat($projectsAll->map(fn($project) => [
+            ->concat($projectsAll->map(fn ($project) => [
                 'type' => 'project',
                 'item' => $project,
                 'time' => $project->created_at,
             ]))
-            ->concat($papersAll->map(fn($paper) => [
+            ->concat($papersAll->map(fn ($paper) => [
                 'type' => 'paper',
                 'item' => $paper,
                 'time' => $paper->created_at,
             ]))
-            ->concat($groupsAll->map(fn($group) => [
+            ->concat($groupsAll->map(fn ($group) => [
                 'type' => 'group',
                 'item' => $group,
                 'time' => $group->created_at,
             ]))
-            ->concat($jobListingsAll->map(fn($jobListing) => [
+            ->concat($jobListingsAll->map(fn ($jobListing) => [
                 'type' => 'job',
                 'item' => $jobListing,
                 'time' => $jobListing->created_at,
             ]))
-            ->concat($enrolmentListingsAll->map(fn($enrolmentListing) => [
+            ->concat($enrolmentListingsAll->map(fn ($enrolmentListing) => [
                 'type' => 'enrolment',
                 'item' => $enrolmentListing,
                 'time' => $enrolmentListing->created_at,

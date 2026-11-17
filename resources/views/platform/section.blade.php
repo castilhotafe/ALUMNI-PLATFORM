@@ -15,7 +15,5 @@
         @include('platform.sections.networking')
     @elseif ($section === 'discover')
         @include('platform.sections.discover')
-    @elseif ($section === 'messages')
-        @include('platform.sections.messages')
     @endif
 @endsection

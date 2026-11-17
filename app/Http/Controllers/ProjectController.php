@@ -24,14 +24,14 @@ class ProjectController extends Controller
         $project->users()->attach($request->user()->id, ['contribution_role' => 'Owner']);
 
         $collaborators = collect($validated['collaborators'] ?? [])
-            ->filter(fn($collaborator) => filled($collaborator['name'] ?? null))
-            ->map(fn($collaborator) => [
+            ->filter(fn ($collaborator) => filled($collaborator['name'] ?? null))
+            ->map(fn ($collaborator) => [
                 'name' => $collaborator['name'],
                 'role' => $collaborator['role'] ?? null,
             ]);
 
         $ownerName = $request->user()->name;
-        if (! $collaborators->contains(fn($collaborator) => strcasecmp($collaborator['name'], $ownerName) === 0)) {
+        if (! $collaborators->contains(fn ($collaborator) => strcasecmp($collaborator['name'], $ownerName) === 0)) {
             $collaborators->push([
                 'name' => $ownerName,
                 'role' => 'Owner',
@@ -45,7 +45,7 @@ class ProjectController extends Controller
         $profileData = [
             'bio' => $validated['profile_bio'] ?? null,
             'details' => collect($validated['profile_details'] ?? [])
-                ->filter(fn($detail) => filled($detail))
+                ->filter(fn ($detail) => filled($detail))
                 ->values()
                 ->all(),
             'picture_url' => $validated['picture_url'] ?? null,
@@ -71,14 +71,14 @@ class ProjectController extends Controller
 
         if ($request->has('collaborators')) {
             $collaborators = collect($validated['collaborators'] ?? [])
-                ->filter(fn($collaborator) => filled($collaborator['name'] ?? null))
-                ->map(fn($collaborator) => [
+                ->filter(fn ($collaborator) => filled($collaborator['name'] ?? null))
+                ->map(fn ($collaborator) => [
                     'name' => $collaborator['name'],
                     'role' => $collaborator['role'] ?? null,
                 ]);
 
             $ownerName = $request->user()->name;
-            if (! $collaborators->contains(fn($collaborator) => strcasecmp($collaborator['name'], $ownerName) === 0)) {
+            if (! $collaborators->contains(fn ($collaborator) => strcasecmp($collaborator['name'], $ownerName) === 0)) {
                 $collaborators->push([
                     'name' => $ownerName,
                     'role' => 'Owner',
@@ -103,9 +103,9 @@ class ProjectController extends Controller
 
                 'details' => $request->has('profile_details')
                     ? collect($validated['profile_details'] ?? [])
-                    ->filter(fn($detail) => filled($detail))
-                    ->values()
-                    ->all()
+                        ->filter(fn ($detail) => filled($detail))
+                        ->values()
+                        ->all()
                     : ($project->profile?->details ?? []),
             ];
 

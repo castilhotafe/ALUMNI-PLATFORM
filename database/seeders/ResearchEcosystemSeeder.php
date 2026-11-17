@@ -22,14 +22,14 @@ class ResearchEcosystemSeeder extends Seeder
 
         for ($i = 1; $i <= self::RESEARCH_PAPER_COUNT; $i++) {
             $title = $this->paperTitleFor($i);
-            $doi = '10.2026/nmtafe.paper.' . str_pad((string) $i, 5, '0', STR_PAD_LEFT);
+            $doi = '10.2026/nmtafe.paper.'.str_pad((string) $i, 5, '0', STR_PAD_LEFT);
 
             $paper = ResearchPaper::updateOrCreate(
                 ['doi' => $doi],
                 [
                     'title' => $title,
                     'abstract' => 'This paper explores practical pathways from study to industry contribution through applied collaboration and reflective evaluation.',
-                    'pdf_url' => 'https://example.com/papers/' . $i . '.pdf',
+                    'pdf_url' => 'https://example.com/papers/'.$i.'.pdf',
                     'visibility' => $i % 5 === 0 ? 'private' : 'public',
                 ]
             );
@@ -45,9 +45,9 @@ class ResearchEcosystemSeeder extends Seeder
             ResearchPaperProfile::updateOrCreate(
                 ['research_paper_id' => $paper->id],
                 [
-                    'bio' => 'Profile for ' . $title . '.',
+                    'bio' => 'Profile for '.$title.'.',
                     'details' => ['Methodology', 'Findings', 'Limitations', 'Future Work'],
-                    'picture_url' => 'https://picsum.photos/seed/paper-' . $i . '/640/360',
+                    'picture_url' => 'https://picsum.photos/seed/paper-'.$i.'/640/360',
                 ]
             );
         }
@@ -87,7 +87,7 @@ class ResearchEcosystemSeeder extends Seeder
         ];
 
         return $subjects[($index - 1) % count($subjects)]
-            . ': '
-            . $angles[((int) ceil($index / count($subjects)) - 1) % count($angles)];
+            .': '
+            .$angles[((int) ceil($index / count($subjects)) - 1) % count($angles)];
     }
 }

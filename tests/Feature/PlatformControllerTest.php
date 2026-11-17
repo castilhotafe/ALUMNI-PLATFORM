@@ -58,7 +58,7 @@ describe('Projects Section (PlatformController@projects)', function () {
                 'pageTitle' => 'Projects',
                 'sectionKicker' => 'Collaboration',
             ])
-            ->assertViewHas('projects', fn($projects) => $projects->contains($project));
+            ->assertViewHas('projects', fn ($projects) => $projects->contains($project));
     });
 
     it('filters projects by search query and selected profile details', function () {
@@ -87,7 +87,7 @@ describe('Projects Section (PlatformController@projects)', function () {
             ->assertViewHas('projects', function ($projects) use ($matchedProject, $unmatchedProject) {
                 return $projects->contains($matchedProject) && ! $projects->contains($unmatchedProject);
             })
-            ->assertViewHas('detailOptions', fn($options) => in_array('PHP', $options, true));
+            ->assertViewHas('detailOptions', fn ($options) => in_array('PHP', $options, true));
     });
 });
 
@@ -108,7 +108,7 @@ describe('Research Papers Section (PlatformController@papers)', function () {
                 'pageTitle' => 'Research Papers',
                 'sectionKicker' => 'Knowledge sharing',
             ])
-            ->assertViewHas('papers', fn($papers) => $papers->contains($paper));
+            ->assertViewHas('papers', fn ($papers) => $papers->contains($paper));
     });
 
     it('filters research papers by keyword search query and profile details', function () {
@@ -155,7 +155,7 @@ describe('Personal Workspace Section (PlatformController@me)', function () {
                 'pageTitle' => 'Me',
                 'sectionKicker' => 'Personal hub',
             ])
-            ->assertViewHas('user', fn($viewUser) => $viewUser->id === $user->id);
+            ->assertViewHas('user', fn ($viewUser) => $viewUser->id === $user->id);
     });
 });
 
@@ -177,7 +177,7 @@ describe('Developer Directory Section (PlatformController@directory)', function 
                 'pageTitle' => 'Developer Directory',
                 'sectionKicker' => 'Find alumni',
             ])
-            ->assertViewHas('users', fn($users) => $users->contains($currentUser) && $users->contains($otherUser));
+            ->assertViewHas('users', fn ($users) => $users->contains($currentUser) && $users->contains($otherUser));
     });
 
     it('filters directory members by search query and skill detail options', function () {
@@ -222,8 +222,8 @@ describe('Networking Hub Section (PlatformController@networking)', function () {
                 'pageTitle' => 'Networking Hub',
                 'sectionKicker' => 'Communities',
             ])
-            ->assertViewHas('groups', fn($groups) => $groups->contains($group))
-            ->assertViewHas('memberGroups', fn($memberGroups) => $memberGroups->contains($group));
+            ->assertViewHas('groups', fn ($groups) => $groups->contains($group))
+            ->assertViewHas('memberGroups', fn ($memberGroups) => $memberGroups->contains($group));
     });
 
     it('filters networking groups by title, description, or attached member names', function () {
@@ -269,8 +269,8 @@ describe('Discover Hub Section (PlatformController@discover)', function () {
                 'pageTitle' => 'Discover Hub',
                 'sectionKicker' => 'Opportunities',
             ])
-            ->assertViewHas('jobListings', fn($jobs) => $jobs->getCollection()->contains($jobListing))
-            ->assertViewHas('enrolmentListings', fn($enrolments) => $enrolments->getCollection()->contains($enrolmentListing));
+            ->assertViewHas('jobListings', fn ($jobs) => $jobs->getCollection()->contains($jobListing))
+            ->assertViewHas('enrolmentListings', fn ($enrolments) => $enrolments->getCollection()->contains($enrolmentListing));
     });
 
     it('populates manageable listings filtered by creator for listing managers', function () {
@@ -350,6 +350,6 @@ describe('Discover Hub Section (PlatformController@discover)', function () {
                 return $jobs->getCollection()->contains($matchedJob)
                     && ! $jobs->getCollection()->contains($unmatchedJob);
             })
-            ->assertViewHas('detailOptions', fn($options) => in_array('DevOps', $options, true));
+            ->assertViewHas('detailOptions', fn ($options) => in_array('DevOps', $options, true));
     });
 });

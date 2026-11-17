@@ -9,6 +9,7 @@ use Illuminate\Database\Seeder;
 class CommunityContentSeeder extends Seeder
 {
     public const POST_COUNT = 120;
+
     public const DIRECT_CONVERSATION_COUNT = 60;
 
     public function run(): void
@@ -52,7 +53,7 @@ class CommunityContentSeeder extends Seeder
         ];
 
         return $topics[($index - 1) % count($topics)]
-            . ' - '
-            . $formats[((int) ceil($index / count($topics)) - 1) % count($formats)];
+            .' - '
+            .$formats[((int) ceil($index / count($topics)) - 1) % count($formats)];
     }
 }

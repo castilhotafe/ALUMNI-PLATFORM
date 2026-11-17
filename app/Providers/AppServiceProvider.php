@@ -6,8 +6,8 @@ use App\Models\EnrolmentListing;
 use App\Models\JobListing;
 use App\Policies\EnrolmentListingPolicy;
 use App\Policies\JobListingPolicy;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
