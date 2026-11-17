@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EnrolmentListing;
 use App\Models\Group;
+use App\Models\JobListing;
 use App\Models\Project;
 use App\Models\ResearchPaper;
 use App\Models\User;
@@ -321,6 +323,111 @@ class PlatformController extends Controller
             'projects' => $projects,
             'papers' => $papers,
             'members' => $members,
+            'searchQuery' => $search,
+            'selectedDetails' => $selectedDetails,
+            'detailOptions' => $detailOptions,
+        ]);
+    }
+
+    private function canPostListings(): bool
+    {
+        $user = auth()->user();
+
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        // Require explicit partner verification for users who declared as Partner.
+        // Even if permissions exist, a Partner should not be allowed to post until
+        // an admin has set `isVerifiedPartner` to true.
+        if (($user->isPartner && ! $user->isVerifiedPartner) || ($user->isLecturer && ! $user->isVerifiedLecturer)) {
+            return false;
+        }
+
+        return $user->hasAnyPermission(['create job listings', 'create enrolment listings']);
+    }
+
+    public function discover(Request $request): View
+    {
+        $search = $this->searchQuery($request);
+        $selectedDetails = $this->selectedDetails($request);
+
+        $allJobListings = JobListing::with('creator.profile')->latest()->get();
+        $allEnrolmentListings = EnrolmentListing::with('creator.profile')->latest()->get();
+        $canPostListings = $this->canPostListings();
+
+        $manageableJobListings = collect();
+        $manageableEnrolmentListings = collect();
+        if ($canPostListings) {
+            $user = $request->user();
+
+            $manageableJobListings = JobListing::with('creator.profile')
+                ->when(! $user->hasRole('Admin'), fn($query) => $query->where('creator_user_id', $user->id))
+                ->latest()
+                ->get();
+
+            $manageableEnrolmentListings = EnrolmentListing::with('creator.profile')
+                ->when(! $user->hasRole('Admin'), fn($query) => $query->where('creator_user_id', $user->id))
+                ->latest()
+                ->get();
+        }
+
+        $jobListingsFiltered = $allJobListings->filter(fn($listing) => $this->matchesSearch([
+            $listing->title,
+            $listing->company,
+            $listing->description,
+            $listing->profile?->bio,
+            $listing->profile?->details ?? [],
+        ], $search, $selectedDetails))->values();
+
+        $enrolmentListingsFiltered = $allEnrolmentListings->filter(fn($listing) => $this->matchesSearch([
+            $listing->course_title,
+            $listing->tafe_provider,
+            $listing->description,
+            $listing->profile?->bio,
+            $listing->profile?->details ?? [],
+        ], $search, $selectedDetails))->values();
+
+        $manageableJobListings = $manageableJobListings->filter(fn($listing) => $this->matchesSearch([
+            $listing->title,
+            $listing->company,
+            $listing->description,
+            $listing->profile?->bio,
+            $listing->profile?->details ?? [],
+        ], $search, $selectedDetails))->values();
+
+        $manageableEnrolmentListings = $manageableEnrolmentListings->filter(fn($listing) => $this->matchesSearch([
+            $listing->course_title,
+            $listing->tafe_provider,
+            $listing->description,
+            $listing->profile?->bio,
+            $listing->profile?->details ?? [],
+        ], $search, $selectedDetails))->values();
+
+        $jobListings = $this->paginateFilteredCollection($jobListingsFiltered, 6, $request, 'jobsPage');
+        $enrolmentListings = $this->paginateFilteredCollection($enrolmentListingsFiltered, 6, $request, 'enrolmentsPage');
+
+        $detailOptions = collect()
+            ->concat($allJobListings)
+            ->concat($allEnrolmentListings)
+            ->concat($manageableJobListings)
+            ->concat($manageableEnrolmentListings)
+            ->flatMap(fn($listing) => $listing->profile?->details ?? [])
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        return view('platform.section', [
+            'section' => 'discover',
+            'pageTitle' => 'Discover Hub',
+            'sectionKicker' => 'Opportunities',
+            'jobListings' => $jobListings,
+            'enrolmentListings' => $enrolmentListings,
+            'manageableJobListings' => $manageableJobListings,
+            'manageableEnrolmentListings' => $manageableEnrolmentListings,
+            'canPostListings' => $canPostListings,
             'searchQuery' => $search,
             'selectedDetails' => $selectedDetails,
             'detailOptions' => $detailOptions,
