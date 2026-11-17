@@ -11,9 +11,11 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolePermissionSeeder::class,
             UserAndProfilesSeeder::class,
-            GroupEcosystemSeeder::class,
             ProjectsEcosystemSeeder::class,
             ResearchEcosystemSeeder::class,
+            GroupEcosystemSeeder::class,
+            CommunityContentSeeder::class,
+            CollaboratorsSeeders::class,
         ]);
     }
 }

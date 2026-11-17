@@ -45,7 +45,7 @@ class GroupEcosystemSeeder extends Seeder
             ]);
 
             $memberIds
-                ->reject(fn (int $memberId) => $memberId === $creatorId)
+                ->reject(fn(int $memberId) => $memberId === $creatorId)
                 ->each(function (int $memberId) use ($group): void {
                     $group->members()->syncWithoutDetaching([
                         $memberId => ['member_role' => 'member'],
@@ -64,9 +64,9 @@ class GroupEcosystemSeeder extends Seeder
 
             GroupProfile::create([
                 'group_id' => $group->id,
-                'bio' => 'Profile for '.$groupName.'.',
+                'bio' => 'Profile for ' . $groupName . '.',
                 'details' => ['Networking', 'Mentorship', 'Projects', 'Events'],
-                'picture_url' => 'https://picsum.photos/seed/group-'.$i.'/640/360',
+                'picture_url' => 'https://picsum.photos/seed/group-' . $i . '/640/360',
             ]);
         }
     }
@@ -91,7 +91,7 @@ class GroupEcosystemSeeder extends Seeder
         ];
 
         return $prefixes[($index - 1) % count($prefixes)]
-            .' '
-            .$suffixes[((int) ceil($index / count($prefixes)) - 1) % count($suffixes)];
+            . ' '
+            . $suffixes[((int) ceil($index / count($prefixes)) - 1) % count($suffixes)];
     }
 }
