@@ -42,7 +42,6 @@
             ['label' => 'Research Papers', 'route' => 'papers'],
             ['label' => 'Networking Hub', 'route' => 'networking'],
             ['label' => 'Discover Hub', 'route' => 'discover'],
-            ['label' => 'Messages', 'route' => 'messages'],
             ['label' => 'Profile', 'route' => 'profile.edit'],
         ];
     @endphp
