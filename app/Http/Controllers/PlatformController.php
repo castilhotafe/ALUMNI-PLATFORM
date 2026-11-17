@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Group;
 use App\Models\Project;
 use App\Models\ResearchPaper;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -21,7 +23,7 @@ class PlatformController extends Controller
     {
         return collect($request->input('details', []))
             ->flatten()
-            ->map(fn ($value) => trim((string) $value))
+            ->map(fn($value) => trim((string) $value))
             ->filter()
             ->unique()
             ->values()
@@ -42,7 +44,7 @@ class PlatformController extends Controller
 
                 return [$value];
             })
-            ->map(fn ($value) => trim((string) $value))
+            ->map(fn($value) => trim((string) $value))
             ->filter()
             ->values();
     }
@@ -59,7 +61,7 @@ class PlatformController extends Controller
             return true;
         }
 
-        $normalizedTokens = $tokens->map(fn ($value) => Str::lower($value))->all();
+        $normalizedTokens = $tokens->map(fn($value) => Str::lower($value))->all();
 
         foreach ($selectedDetails as $detail) {
             if (! in_array(Str::lower($detail), $normalizedTokens, true)) {
@@ -68,6 +70,27 @@ class PlatformController extends Controller
         }
 
         return true;
+    }
+
+    private function paginateFilteredCollection(Collection $items, int $perPage, Request $request, string $pageName): LengthAwarePaginator
+    {
+        $currentPage = max(1, (int) $request->query($pageName, 1));
+
+        return new LengthAwarePaginator(
+            $items->forPage($currentPage, $perPage)->values(),
+            $items->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'pageName' => $pageName,
+            ]
+        )->withQueryString();
+    }
+
+    private function communityRoles(): array
+    {
+        return ['Current Student', 'Alumni', 'Lecturer', 'Partner', 'General User', 'Admin'];
     }
 
     public function projects(Request $request): View
@@ -82,7 +105,7 @@ class PlatformController extends Controller
             ->get();
 
         $projects = $allProjects
-            ->filter(fn ($project) => $this->matchesSearch([
+            ->filter(fn($project) => $this->matchesSearch([
                 $project->title,
                 $project->description,
                 $project->profile?->bio,
@@ -96,7 +119,7 @@ class PlatformController extends Controller
             ->withCount('collaborators')
             ->orderByDesc('projects.created_at')
             ->get()
-            ->filter(fn ($project) => $this->matchesSearch([
+            ->filter(fn($project) => $this->matchesSearch([
                 $project->title,
                 $project->description,
                 $project->profile?->bio,
@@ -106,7 +129,7 @@ class PlatformController extends Controller
             ->values();
 
         $detailOptions = $allProjects
-            ->flatMap(fn ($project) => $project->profile?->details ?? [])
+            ->flatMap(fn($project) => $project->profile?->details ?? [])
             ->filter()
             ->unique()
             ->sort()
@@ -137,7 +160,7 @@ class PlatformController extends Controller
             ->get();
 
         $papers = $allPapers
-            ->filter(fn ($paper) => $this->matchesSearch([
+            ->filter(fn($paper) => $this->matchesSearch([
                 $paper->title,
                 $paper->abstract,
                 $paper->doi,
@@ -151,7 +174,7 @@ class PlatformController extends Controller
             ->withCount('authors')
             ->orderByDesc('research_papers.created_at')
             ->get()
-            ->filter(fn ($paper) => $this->matchesSearch([
+            ->filter(fn($paper) => $this->matchesSearch([
                 $paper->title,
                 $paper->abstract,
                 $paper->doi,
@@ -162,7 +185,7 @@ class PlatformController extends Controller
             ->values();
 
         $detailOptions = $allPapers
-            ->flatMap(fn ($paper) => $paper->profile?->details ?? [])
+            ->flatMap(fn($paper) => $paper->profile?->details ?? [])
             ->filter()
             ->unique()
             ->sort()
@@ -186,9 +209,9 @@ class PlatformController extends Controller
         $search = $this->searchQuery($request);
         $user = $request->user()->load([
             'profile',
-            'posts' => fn ($query) => $query->latest(),
-            'projects' => fn ($query) => $query->with('collaborators')->orderByDesc('projects.created_at')->take(10),
-            'researchPapers' => fn ($query) => $query->with('authors')->orderByDesc('research_papers.created_at')->take(10),
+            'posts' => fn($query) => $query->latest(),
+            'projects' => fn($query) => $query->with('collaborators')->orderByDesc('projects.created_at')->take(10),
+            'researchPapers' => fn($query) => $query->with('authors')->orderByDesc('research_papers.created_at')->take(10),
         ]);
 
         return view('platform.section', [
@@ -198,11 +221,6 @@ class PlatformController extends Controller
             'user' => $user,
             'searchQuery' => $search,
         ]);
-    }
-
-    private function communityRoles(): array
-    {
-        return ['Current Student', 'Alumni', 'Lecturer', 'Partner', 'General User', 'Admin'];
     }
 
     public function directory(Request $request): View
@@ -216,7 +234,7 @@ class PlatformController extends Controller
             ->get();
 
         $users = $allUsers
-            ->filter(fn ($user) => $this->matchesSearch([
+            ->filter(fn($user) => $this->matchesSearch([
                 $user->name,
                 $user->profile?->bio,
                 $user->profile?->details ?? [],
@@ -224,7 +242,7 @@ class PlatformController extends Controller
             ->values();
 
         $detailOptions = $allUsers
-            ->flatMap(fn ($user) => $user->profile?->details ?? [])
+            ->flatMap(fn($user) => $user->profile?->details ?? [])
             ->filter()
             ->unique()
             ->sort()
@@ -236,6 +254,73 @@ class PlatformController extends Controller
             'pageTitle' => 'Developer Directory',
             'sectionKicker' => 'Find alumni',
             'users' => $users,
+            'searchQuery' => $search,
+            'selectedDetails' => $selectedDetails,
+            'detailOptions' => $detailOptions,
+        ]);
+    }
+
+    public function networking(Request $request): View
+    {
+        $user = $request->user();
+        $search = $this->searchQuery($request);
+        $selectedDetails = $this->selectedDetails($request);
+        $allGroups = Group::with(['creator.profile', 'members.profile', 'projects', 'researchPapers', 'profile'])
+            ->withCount(['members', 'projects', 'researchPapers'])
+            ->latest()
+            ->get();
+
+        $groups = $allGroups
+            ->filter(fn($group) => $this->matchesSearch([
+                $group->name,
+                $group->description,
+                $group->profile?->bio,
+                $group->profile?->details ?? [],
+                $group->creator?->name,
+                $group->members?->pluck('name') ?? [],
+                $group->projects?->pluck('title') ?? [],
+                $group->researchPapers?->pluck('title') ?? [],
+            ], $search, $selectedDetails))
+            ->values();
+
+        $memberGroups = Group::with(['creator.profile', 'members.profile', 'projects', 'researchPapers', 'profile'])
+            ->whereHas('members', fn($query) => $query->whereKey($user->id))
+            ->withCount(['members', 'projects', 'researchPapers'])
+            ->orderByDesc('groups.created_at')
+            ->get()
+            ->filter(fn($group) => $this->matchesSearch([
+                $group->name,
+                $group->description,
+                $group->profile?->bio,
+                $group->profile?->details ?? [],
+                $group->creator?->name,
+                $group->members?->pluck('name') ?? [],
+                $group->projects?->pluck('title') ?? [],
+                $group->researchPapers?->pluck('title') ?? [],
+            ], $search, $selectedDetails))
+            ->values();
+
+        $detailOptions = $allGroups
+            ->flatMap(fn($group) => $group->profile?->details ?? [])
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        $projects = Project::visibleTo($user)->orderBy('title')->get(['id', 'title']);
+        $papers = ResearchPaper::visibleTo($user)->orderBy('title')->get(['id', 'title']);
+        $members = User::role($this->communityRoles())->orderBy('name')->get(['id', 'name']);
+
+        return view('platform.section', [
+            'section' => 'networking',
+            'pageTitle' => 'Networking Hub',
+            'sectionKicker' => 'Communities',
+            'groups' => $groups,
+            'memberGroups' => $memberGroups,
+            'projects' => $projects,
+            'papers' => $papers,
+            'members' => $members,
             'searchQuery' => $search,
             'selectedDetails' => $selectedDetails,
             'detailOptions' => $detailOptions,
