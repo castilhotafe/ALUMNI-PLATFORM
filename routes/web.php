@@ -8,7 +8,9 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\EnrolmentListingController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\JobListingController;
 use App\Http\Controllers\MeController;
 use App\Http\Controllers\PaperController;
 use App\Http\Controllers\PlatformController;
@@ -68,6 +70,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/me', [PlatformController::class, 'me'])->name('me');
     Route::get('/directory', [PlatformController::class, 'directory'])->name('directory');
     Route::get('/networking-hub', [PlatformController::class, 'networking'])->name('networking');
+    Route::get('/discover-hub', [PlatformController::class, 'discover'])->name('discover');
 
     // Project Routes
     Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
@@ -96,4 +99,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
     Route::patch('/groups/{group}', [GroupController::class, 'update'])->name('groups.update');
     Route::delete('/groups/{group}', [GroupController::class, 'destroy'])->name('groups.destroy');
+
+    // Job Listing Routes
+    Route::post('/job-listings', [JobListingController::class, 'store'])
+        ->name('job-listings.store')
+        ->middleware('permission:create job listings');
+    Route::patch('/job-listings/{job_listing}', [JobListingController::class, 'update'])
+        ->name('job-listings.update')
+        ->middleware('permission:create job listings');
+    Route::delete('/job-listings/{job_listing}', [JobListingController::class, 'destroy'])
+        ->name('job-listings.destroy')
+        ->middleware('permission:create job listings');
+    Route::get('/job-listings/{job_listing}/apply', [JobListingController::class, 'trackJobApplication'])->name('job-listings.apply');
+
+    // Enrolment Listing Routes
+    Route::post('/enrolment-listings', [EnrolmentListingController::class, 'store'])
+        ->name('enrolment-listings.store')
+        ->middleware('permission:create enrolment listings');
+    Route::patch('/enrolment-listings/{enrolment_listing}', [EnrolmentListingController::class, 'update'])
+        ->name('enrolment-listings.update')
+        ->middleware('permission:create enrolment listings');
+    Route::delete('/enrolment-listings/{enrolment_listing}', [EnrolmentListingController::class, 'destroy'])
+        ->name('enrolment-listings.destroy')
+        ->middleware('permission:create enrolment listings');
+    Route::get('/enrolment-listings/{enrolment_listing}/enrol', [EnrolmentListingController::class, 'trackEnrolmentLink'])->name('enrolment-listings.enrol');
 });
