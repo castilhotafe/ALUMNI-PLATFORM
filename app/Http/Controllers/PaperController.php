@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ContributionTriggered;
 use App\Http\Requests\StorePaperRequest;
 use App\Http\Requests\UpdatePaperRequest;
 use App\Models\ResearchPaper;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
 class PaperController extends Controller
@@ -50,6 +52,7 @@ class PaperController extends Controller
         if (filled($profileData['bio']) || filled($profileData['picture_url']) || ! empty($profileData['details'])) {
             $paper->profile()->create($profileData);
         }
+        ContributionTriggered::dispatch($request->user(), 'research_paper_created', $paper);
 
         return back()->with('status_paper', 'Research paper created.');
     }
@@ -108,12 +111,16 @@ class PaperController extends Controller
                 $paper->profile()->create($profileData);
             }
         }
+        ContributionTriggered::dispatch($request->user(), 'research_paper_updated', $paper);
 
         return back()->with('status', 'Research paper updated.');
     }
 
-    public function destroy(ResearchPaper $paper): RedirectResponse
+    public function destroy(ResearchPaper $paper, Request $request): RedirectResponse
     {
+        if ($user = $request->user()) {
+            ContributionTriggered::dispatch($user, 'paper_deleted', $paper);
+        }
         $paper->delete();
 
         return back()->with('status', 'Research paper deleted.');

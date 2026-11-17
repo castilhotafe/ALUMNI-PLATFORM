@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ContributionTriggered;
 use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
 use App\Models\Group;
@@ -59,9 +60,10 @@ class GroupController extends Controller
             'picture_url' => $validated['picture_url'] ?? null,
         ];
 
-        if (filled($profileData['bio']) || filled($profileData['picture_url']) || !empty($profileData['details'])) {
+        if (filled($profileData['bio']) || filled($profileData['picture_url']) || ! empty($profileData['details'])) {
             $group->profile()->create($profileData);
         }
+        ContributionTriggered::dispatch($request->user(), 'group_created', $group);
 
         return back()->with('status_group', 'Group created.');
     }
@@ -113,9 +115,10 @@ class GroupController extends Controller
 
         if ($group->profile) {
             $group->profile->update($profileData);
-        } elseif (filled($profileData['bio']) || filled($profileData['picture_url']) || !empty($profileData['details'])) {
+        } elseif (filled($profileData['bio']) || filled($profileData['picture_url']) || ! empty($profileData['details'])) {
             $group->profile()->create($profileData);
         }
+        ContributionTriggered::dispatch($request->user(), 'group_updated', $group);
 
         return back()->with('status', 'Group updated.');
     }
@@ -123,7 +126,7 @@ class GroupController extends Controller
     public function destroy(Request $request, Group $group): RedirectResponse
     {
         abort_unless($group->creator_user_id === $request->user()->id, 403);
-
+        ContributionTriggered::dispatch($request->user(), 'group_deleted', $group);
         $group->delete();
 
         return back()->with('status', 'Group deleted.');

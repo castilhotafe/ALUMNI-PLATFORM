@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ContributionTriggered;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
 class ProjectController extends Controller
@@ -52,6 +54,7 @@ class ProjectController extends Controller
         if (filled($profileData['bio']) || filled($profileData['picture_url']) || ! empty($profileData['details'])) {
             $project->profile()->create($profileData);
         }
+        ContributionTriggered::dispatch($request->user(), 'project_created', $project);
 
         return back()->with('status_project', 'Project created.');
     }
@@ -112,6 +115,7 @@ class ProjectController extends Controller
                 $project->profile()->create($profileData);
             }
         }
+        ContributionTriggered::dispatch($request->user(), 'project_updated', $project);
 
         return back()->with('status', 'Project updated.');
     }
@@ -119,8 +123,11 @@ class ProjectController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Project $project): RedirectResponse
+    public function destroy(Project $project, Request $request): RedirectResponse
     {
+        if ($user = $request->user()) {
+            ContributionTriggered::dispatch($user, 'project_deleted', $project);
+        }
         $project->delete();
 
         return back()->with('status', 'Project deleted.');

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-// use App\Events\ContributionTriggered;
+use App\Events\ContributionTriggered;
 use App\Http\Requests\StoreEnrolmentListingRequest;
 use App\Http\Requests\UpdateEnrolmentListingRequest;
 use App\Models\EnrolmentListing;
@@ -76,7 +76,7 @@ class EnrolmentListingController extends Controller
 
     public function trackEnrolmentLink(Request $request, EnrolmentListing $enrolmentListing): RedirectResponse
     {
-        // ContributionTriggered::dispatch($request->user(), 'enrolment_link_clicked', $enrolmentListing);
+        ContributionTriggered::dispatch($request->user(), 'enrolment_link_clicked', $enrolmentListing);
         $destination = $enrolmentListing->enrol_link ?: route('discover');
 
         return redirect()->away($destination);
