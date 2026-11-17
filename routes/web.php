@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\ContributionController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\LoginController;
@@ -123,4 +125,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('enrolment-listings.destroy')
         ->middleware('permission:create enrolment listings');
     Route::get('/enrolment-listings/{enrolment_listing}/enrol', [EnrolmentListingController::class, 'trackEnrolmentLink'])->name('enrolment-listings.enrol');
+
+    // Admin Routes
+    Route::get('/admin', [AdminController::class, 'dashboard'])
+        ->middleware('role:Admin')
+        ->name('admin.dashboard');
+    Route::get('/admin/contributions', [ContributionController::class, 'index'])
+        ->middleware('role:Admin')
+        ->name('admin.contributions.index');
+    Route::post('/admin/contributions', [ContributionController::class, 'store'])
+        ->middleware('role:Admin')
+        ->name('admin.contributions.store');
+    Route::patch('/admin/users/{user}/verify', [AdminController::class, 'updateVerification'])
+        ->middleware('role:Admin')
+        ->name('admin.users.verify');
+    Route::post('/admin/users', [AdminController::class, 'storeUser'])
+        ->middleware('role:Admin')
+        ->name('admin.users.store');
+    Route::patch('/admin/users/{user}', [AdminController::class, 'updateUser'])
+        ->middleware('role:Admin')
+        ->name('admin.users.update');
+    Route::delete('/admin/users/{user}', [AdminController::class, 'destroyUser'])
+        ->middleware('role:Admin')
+        ->name('admin.users.destroy');
 });
