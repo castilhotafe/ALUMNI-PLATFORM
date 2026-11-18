@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\ViewErrorBag;
+use Spatie\Permission\Traits\HasRoles;
 
 // These are Blade rendering tests, not endpoint or browser interaction tests.
 // Profile routes belong to a separate issue; PostController is tracked separately.
@@ -21,15 +22,17 @@ beforeEach(function () {
     $this->app['request']->setLaravelSession($this->app['session']->driver());
     View::share('errors', new ViewErrorBag);
 
-    foreach ([
-        ['PATCH', '/_profile-view-tests/me/profile', 'me.profile.update'],
-        ['GET', '/_profile-view-tests/profile', 'profile.edit'],
-        ['PATCH', '/_profile-view-tests/profile', 'profile.update'],
-        ['DELETE', '/_profile-view-tests/profile', 'profile.destroy'],
-        ['POST', '/_profile-view-tests/posts', 'posts.store'],
-        ['PATCH', '/_profile-view-tests/posts/{post}', 'posts.update'],
-        ['DELETE', '/_profile-view-tests/posts/{post}', 'posts.destroy'],
-    ] as [$method, $uri, $name]) {
+    foreach (
+        [
+            ['PATCH', '/_profile-view-tests/me/profile', 'me.profile.update'],
+            ['GET', '/_profile-view-tests/profile', 'profile.edit'],
+            ['PATCH', '/_profile-view-tests/profile', 'profile.update'],
+            ['DELETE', '/_profile-view-tests/profile', 'profile.destroy'],
+            ['POST', '/_profile-view-tests/posts', 'posts.store'],
+            ['PATCH', '/_profile-view-tests/posts/{post}', 'posts.update'],
+            ['DELETE', '/_profile-view-tests/posts/{post}', 'posts.destroy'],
+        ] as [$method, $uri, $name]
+    ) {
         if (! Route::has($name)) {
             // Only URL generation is needed. Never serve production behavior here.
             Route::match([$method], $uri, fn () => abort(501))->name($name);
@@ -182,9 +185,14 @@ it('opens the matching contribution create panel for its success flash', functio
 it('shares old input between contribution create forms', function () {
     $user = meProfileViewUser();
     $this->actingAs($user)->withSession(['_old_input' => [
-        'title' => 'Unsaved title', 'visibility' => 'private', 'body' => 'Unsaved body',
-        'description' => 'Unsaved description', 'repo_url' => 'https://example.test/draft-repo',
-        'abstract' => 'Unsaved abstract', 'doi' => '10.1234/draft', 'pdf_url' => 'https://example.test/draft.pdf',
+        'title' => 'Unsaved title',
+        'visibility' => 'private',
+        'body' => 'Unsaved body',
+        'description' => 'Unsaved description',
+        'repo_url' => 'https://example.test/draft-repo',
+        'abstract' => 'Unsaved abstract',
+        'doi' => '10.1234/draft',
+        'pdf_url' => 'https://example.test/draft.pdf',
     ]]);
 
     $dom = meProfileViewDom((string) $this->view('platform.sections.profile', compact('user')));
@@ -296,11 +304,24 @@ it('renders the existing account saved-state tokens without treating the control
 })->with(['profile token' => ['profile-updated', 1], 'password token' => ['password-updated', 1], 'current profile controller message' => ['Profile updated.', 0]]);
 
 it('keeps the verification reminder conditional on the MustVerifyEmail contract', function () {
-    $user = meProfileViewUser();
-    $user->email_verified_at = null;
+    $user = new class extends Illuminate\Foundation\Auth\User
+    {
+        use HasRoles;
+
+        protected $table = 'users';
+
+        protected $guarded = [];
+    };
+
+    $user->forceFill([
+        'id' => 999,
+        'name' => 'Ada Alumni',
+        'email' => 'ada@example.test',
+        'email_verified_at' => null,
+    ]);
+
     $this->actingAs($user)->withSession(['status' => 'verification-link-sent']);
 
-    // The current User intentionally does not implement MustVerifyEmail.
     $this->view('profile.edit', compact('user'))
         ->assertDontSeeText('Your email address is unverified.')
         ->assertDontSeeText('A new verification link has been sent to your email address.');

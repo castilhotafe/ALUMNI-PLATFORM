@@ -91,4 +91,23 @@ describe('Email Verification Logic', function () {
 
         $response->assertRedirect(route('dashboard', absolute: false));
     });
+
+    test('already verified user is redirected immediately when visiting signed verification link', function () {
+        $user = User::factory()->create([
+            'email_verified_at' => now(),
+        ]);
+
+        Event::fake();
+
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->id, 'hash' => sha1($user->email)]
+        );
+
+        $response = $this->actingAs($user)->get($verificationUrl);
+
+        Event::assertNotDispatched(Verified::class);
+        $response->assertRedirect(route('dashboard', absolute: false).'?verified=1');
+    });
 });

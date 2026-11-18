@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ContributionTriggered;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
 class ProjectController extends Controller
 {
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(StoreProjectRequest $request): RedirectResponse
     {
         $validated = $request->validated();
@@ -49,10 +54,14 @@ class ProjectController extends Controller
         if (filled($profileData['bio']) || filled($profileData['picture_url']) || ! empty($profileData['details'])) {
             $project->profile()->create($profileData);
         }
+        ContributionTriggered::dispatch($request->user(), 'project_created', $project);
 
         return back()->with('status_project', 'Project created.');
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(UpdateProjectRequest $request, Project $project): RedirectResponse
     {
         $validated = $request->validated();
@@ -106,12 +115,19 @@ class ProjectController extends Controller
                 $project->profile()->create($profileData);
             }
         }
+        ContributionTriggered::dispatch($request->user(), 'project_updated', $project);
 
         return back()->with('status', 'Project updated.');
     }
 
-    public function destroy(Project $project): RedirectResponse
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Project $project, Request $request): RedirectResponse
     {
+        if ($user = $request->user()) {
+            ContributionTriggered::dispatch($user, 'project_deleted', $project);
+        }
         $project->delete();
 
         return back()->with('status', 'Project deleted.');

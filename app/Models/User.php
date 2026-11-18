@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-use Database\Factories\UserFactory;
+use App\Models\Concerns\HasContributions;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -31,37 +33,43 @@ use Spatie\Permission\Traits\HasRoles;
     'isVerifiedPartner',
 ])]
 #[Hidden(['password', 'remember_token'])]
-
-class User extends Authenticatable // implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable;
+    use HasContributions, HasFactory, HasRoles, Notifiable;
 
     public function profile(): HasOne
     {
-
         return $this->hasOne(Profile::class);
     }
 
     public function posts(): HasMany
     {
-
         return $this->hasMany(Post::class);
     }
 
     public function projects(): BelongsToMany
     {
-        return $this->belongsToMany(Project::class, 'user_projects')
-            ->withPivot('contribution_role')
-            ->withTimestamps();
+        return $this->belongsToMany(Project::class, 'user_projects')->withPivot('contribution_role')->withTimestamps();
     }
 
     public function researchPapers(): BelongsToMany
     {
-        return $this->belongsToMany(ResearchPaper::class, 'user_papers')
-            ->withPivot('author_order')
-            ->withTimestamps();
+        return $this->belongsToMany(ResearchPaper::class, 'user_papers')->withPivot('author_order')->withTimestamps();
+    }
 
+    public function groups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class, 'group_members')->withPivot('member_role')->withTimestamps();
+    }
+
+    public function jobListings(): HasMany
+    {
+        return $this->hasMany(JobListing::class, 'creator_user_id');
+    }
+
+    public function enrolmentListings(): HasMany
+    {
+        return $this->hasMany(EnrolmentListing::class, 'creator_user_id');
     }
 
     public function selfDeclaredRoleLabel(): ?string
@@ -98,7 +106,7 @@ class User extends Authenticatable // implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password_confirmed_at' => 'datetime',
             'student_id' => 'integer',
             'isCurrent' => 'boolean',
             'isAlumni' => 'boolean',
@@ -108,6 +116,7 @@ class User extends Authenticatable // implements MustVerifyEmail
             'isVerifiedAlumni' => 'boolean',
             'isVerifiedLecturer' => 'boolean',
             'isVerifiedPartner' => 'boolean',
+            'password' => 'hashed',
         ];
     }
 }
