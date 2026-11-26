@@ -89,7 +89,7 @@ class PlatformController extends Controller
                 'pageName' => $pageName,
             ]
         );
-        
+
         $paginator->withQueryString();
 
         return $paginator;
