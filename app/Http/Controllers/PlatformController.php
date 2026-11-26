@@ -79,7 +79,7 @@ class PlatformController extends Controller
     {
         $currentPage = max(1, (int) $request->query($pageName, 1));
 
-        return new LengthAwarePaginator(
+        $paginator = new LengthAwarePaginator(
             $items->forPage($currentPage, $perPage)->values(),
             $items->count(),
             $perPage,
@@ -88,7 +88,11 @@ class PlatformController extends Controller
                 'path' => $request->url(),
                 'pageName' => $pageName,
             ]
-        )->withQueryString();
+        );
+        
+        $paginator->withQueryString();
+
+        return $paginator;
     }
 
     private function communityRoles(): array
