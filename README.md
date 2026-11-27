@@ -7,6 +7,12 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Alumni Platform demo
+
+A 45-second introduction to the North Metropolitan TAFE Alumni Platform for students, alumni, and industry partners.
+
+[![Watch the Alumni Platform demo](docs/media/alumni-platform-poster.jpg)](docs/media/alumni-platform.mp4?raw=true)
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
