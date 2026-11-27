@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\ContributionTriggered;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
+use App\Jobs\SendPublicFeedNotification;
 use App\Models\Post;
 use Illuminate\Http\RedirectResponse;
 
@@ -13,7 +14,19 @@ class PostController extends Controller
     public function store(StorePostRequest $request): RedirectResponse
     {
         $post = $request->user()->posts()->create($request->validated());
-        ContributionTriggered::dispatch($request->user(), 'post_created', $post);
+
+        ContributionTriggered::dispatch(
+            $request->user(),
+            'post_created',
+            $post
+        );
+
+        if (
+            $post->visibility === 'public'
+            && config('services.firebase.enabled')
+        ) {
+            SendPublicFeedNotification::dispatch($post->id)->afterCommit();
+        }
 
         return back()->with('status_post', 'Post created.');
     }
